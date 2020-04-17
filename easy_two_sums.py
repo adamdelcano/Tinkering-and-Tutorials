@@ -1,8 +1,7 @@
-
 class Solution:
-    def twoSum(self, nums, target):
-        solutions = [
-            i for i, j in enumerate(nums, 0)
-            if j * -1 + target in
-            [b for a, b in enumerate(nums) if a != i]]
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        solutions = []
+        for i, j in enumerate(nums):
+            if (target - j) in [b for a, b in enumerate(nums) if a != i]:
+                solutions.append(i)
         return solutions
