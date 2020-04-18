@@ -1,17 +1,12 @@
-
 class Solution:
     def isValid(self, s: str) -> bool:
-        valid_chars = '([{'
+        valid_chars = {'(': ')', '[' : ']', '{': '}'}
         next_valid = ''
         for letter in s:
-            if not (next_valid.endswith(letter) or (letter in valid_chars)):
+            if letter in valid_chars:
+                next_valid += valid_chars[letter]
+            elif not next_valid.endswith(letter):
                 return False
-            elif letter == '(':
-                next_valid += ')'
-            elif letter == '[':
-                next_valid += ']'
-            elif letter == '{':
-                next_valid += '}'
             else:
                 next_valid = next_valid[:-1]
         if next_valid == '':
