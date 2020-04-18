@@ -3,15 +3,13 @@
 class Solution:
     def isValid(self, s: str) -> bool:
         valid_chars = {'(': ')', '[': ']', '{': '}'}
-        next_letter = []
-        for letter in s:
-            if letter in valid_chars:
-                next_letter.append(valid_chars[letter])
-            elif not next_letter:
+        next_character = []
+        for character in s:
+            if character in valid_chars:
+                next_character.append(valid_chars[character])
+            elif not next_character or character != next_character.pop():
                 return False
-            elif letter != next_letter.pop():
-                return False
-        if next_letter:
+        if next_character:
             return False
         else:
             return True
