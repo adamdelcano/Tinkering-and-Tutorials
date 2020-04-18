@@ -1,9 +1,14 @@
+#!/usr/bin/python3
+
+
+from typing import List
+
+
 class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
-        solutions = []
-        for i, j in enumerate(nums):
-            if target - j in nums:
-                if j == (target/2) and nums.count(j) < 2:
-                    pass
-                else: solutions.append(i)
-        return solutions
+        previously_checked = {}
+        for index, num in enumerate(nums):
+            desired_num = target - num
+            if desired_num in previously_checked:
+                return [index, previously_checked[desired_num]]
+            previously_checked.setdefault(num, index)
