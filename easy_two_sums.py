@@ -9,6 +9,6 @@ class Solution:
         previously_checked = {}
         for index, num in enumerate(nums):
             desired_num = target - num
-            if target - num in previously_checked:
+            if desired_num in previously_checked:
                 return [previously_checked[desired_num], index]
-            previously_checked.setdefault(num, index)
+            previously_checked[num] = index
