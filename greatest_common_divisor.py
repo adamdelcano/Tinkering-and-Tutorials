@@ -16,6 +16,4 @@ class Solution:
                     test_string * (len(str2) // len(test_string)) == str2
                 ):
                     common_divisor = test_string
-            else:
-                pass
         return common_divisor
