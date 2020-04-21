@@ -15,8 +15,10 @@ class Solution:
         previous_price = 0  # Maybe enumerate(prices) and uses indexes instead?
         total_profit = 0
         for current_price in prices:
-            if current_price < buy_price \  # Is this split idiomatic?
-            or current_price < previous_price:  # aka Transaction Complete?
+            if (
+                current_price < buy_price or
+                current_price < previous_price
+            ):  # aka is the transaction complete?
                 total_profit += best_profit
                 best_profit = 0
                 buy_price = current_price
