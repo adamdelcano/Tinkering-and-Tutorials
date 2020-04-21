@@ -9,10 +9,13 @@ class Solution:
         common_divisor = ''  # But then I do this so
         for letter in min(str1, str2):
             divisor.append(letter)
-            test_string = ''.join(divisor)
-            if (
-                test_string * (len(str1) // len(test_string)) == str1 and
-                test_string * (len(str2) // len(test_string)) == str2
-            ):  # Probably not the most efficient way to check these, sorry.
-                common_divisor = test_string
+            if len(str1) % len(divisor) == 0 and len(str2) % len(divisor) == 0:
+                test_string = ''.join(divisor)
+                if (
+                    test_string * (len(str1) // len(test_string)) == str1 and
+                    test_string * (len(str2) // len(test_string)) == str2
+                ):
+                    common_divisor = test_string
+            else:
+                pass
         return common_divisor
