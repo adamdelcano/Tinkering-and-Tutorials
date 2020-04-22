@@ -14,19 +14,19 @@ class Solution:
         new_digit = digits.pop() + 1
         if new_digit < 10:
             digits.append(new_digit)
-        else:
+        else:  # if [9, 9, ... 9] there's a chain reaction that needs to happen
             counter += 1
             while digits:
                 new_digit = digits.pop() + 1
                 if new_digit < 10:
                     digits.append(new_digit)
-                    break
+                    break  # Stops once there's not a 9 at the end
                 else:
                     counter += 1
-                    continue
+                    continue  # Keeps going until empty or no 9
             if not digits:
-                digits = [1]
-            while counter > 0:
+                digits = [1]  # If it 999 it's empty now so start at 1
+            while counter > 0:  # add a 0 at the end for every 9 we took off
                 digits.append(0)
                 counter -= 1
         return digits
