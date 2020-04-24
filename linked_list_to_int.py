@@ -9,7 +9,7 @@ class ListNode:
 
 
 class Solution:
-    def getDecimalValue(self, head: ListNode, base=2) -> int:
+    def getDecimalValue(self, head: ListNode, base: int = 2) -> int:
         """Given head, which is a reference node to a singly-linked list.
         The linked list holds representation of a number in given base,
         defaulting to binary. Returns the decimal value of the number."""
