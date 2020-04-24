@@ -14,8 +14,9 @@ class Solution:
         The value of each node in th linked list is either 0 or 1. The
         linked list holds the binary representation of a number. Returns
         the decimal value of the number."""
-        num = ''
+        num = 0
         while head:
-            num += str(head.val)
+            num *= 2  # Shamed I didn't think about this before
+            num += head.val
             head = head.next
-        return int(num, 2)
+        return num
