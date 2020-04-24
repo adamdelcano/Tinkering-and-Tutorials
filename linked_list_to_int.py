@@ -9,14 +9,13 @@ class ListNode:
 
 
 class Solution:
-    def getDecimalValue(self, head: ListNode) -> int:
+    def getDecimalValue(self, head: ListNode, base=2) -> int:
         """Given head, which is a reference node to a singly-linked list.
-        The value of each node in th linked list is either 0 or 1. The
-        linked list holds the binary representation of a number. Returns
-        the decimal value of the number."""
+        The linked list holds representation of a number in given base,
+        defaulting to binary. Returns the decimal value of the number."""
         num = 0
         while head:
-            num *= 2  # Shamed I didn't think about this before
+            num *= base
             num += head.val
             head = head.next
         return num
