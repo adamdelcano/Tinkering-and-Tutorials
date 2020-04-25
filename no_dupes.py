@@ -9,8 +9,6 @@ class Solution:
         last_unique = float('-inf')  # Is there a more idiomatic way?
         index_to_change = 0
         for num in nums:
-            if num == last_unique:
-                nums[index_to_change] = 'marked'
             if num > last_unique:
                 last_unique = num
                 nums[index_to_change] = last_unique
