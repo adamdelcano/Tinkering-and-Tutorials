@@ -10,11 +10,12 @@ class Solution:
         coordinates of all cells in the matrix, sorted by their distance from
         the initial cell, (r0, c0)."""
         matrix = {}
+        matrix_list = []
         for row in range(R):
             for column in range(C):
                 distance = (abs(r0 - row) + abs(c0 - column))
-                matrix.setdefault(distance, [])
-                matrix[distance].append([row, column])
+                distance_key = matrix.setdefault(distance, [])
+                distance_key.append([row, column])
         matrix_list = []
         for key in range(R + C):
             matrix_list.extend(matrix.get(key, []))
