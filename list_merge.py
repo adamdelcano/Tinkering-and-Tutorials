@@ -7,8 +7,13 @@ class ListNode:
         self.val = x
         self.next = None
 
-# The process of making a new tail node should almost certainly be
-# defined as a function. 
+    def insert_after(self, target):  # I added this to cut code reuse
+        new_node = ListNode(target)
+        new_node.next = None
+        self.next = new_node
+        # Would like to put self = self.next here but the structure
+        # of the problem does weird things
+
 
 class Solution:
     def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
@@ -24,32 +29,24 @@ class Solution:
         while l1 and l2:
             # Check which node goes next, then add it to tail.
             if l1.val <= l2.val:
-                new_tail = ListNode(l1.val)
-                new_tail.next = None
-                self.tail.next = new_tail
-                self.tail = new_tail
+                self.tail.insert_after(l1.val)
+                self.tail = self.tail.next
                 l1 = l1.next
             else:
-                new_tail = ListNode(l2.val)
-                new_tail.next = None
-                self.tail.next = new_tail
-                self.tail = new_tail
+                self.tail.insert_after(l2.val)
+                self.tail = self.tail.next
                 l2 = l2.next
         # This approach leaves a straggler, must evacuate the remnants.
         while l1:
-            new_tail = ListNode(l1.val)
-            new_tail.next = None
-            self.tail.next = new_tail
-            self.tail = new_tail
+            self.tail.insert_after(l1.val)
+            self.tail = self.tail.next
             l1 = l1.next
         while l2:
-            new_tail = ListNode(l2.val)
-            new_tail.next = None
-            self.tail.next = new_tail
-            self.tail = new_tail
+            self.tail.insert_after(l2.val)
+            self.tail = self.tail.next
             l2 = l2.next
 
         # Purge Dummy Plug
         while self.head and self.head.val == 'Dummy Plug':
-                self.head = self.head.next
+            self.head = self.head.next
         return self.head
