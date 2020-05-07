@@ -7,46 +7,49 @@ class ListNode:
         self.val = x
         self.next = None
 
-    def insert_after(self, target):  # I added this to cut code reuse
-        new_node = ListNode(target)
-        new_node.next = None
-        self.next = new_node
-        # Would like to put self = self.next here but the structure
-        # of the problem does weird things
-
 
 class Solution:
     def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
         """Merge two sorted linked lists and return it as a new list.
         The new list should be made by splicing together the nodes of the
         first two lists."""
-        # Initialize head and tail.
-        self.head = ListNode('Dummy Plug')
-        self.tail = ListNode('Dummy Plug')
-        self.head.next = self.tail
-        self.tail.next = None
+        # Check for empty lists
+        if l1 is None and l2 is None:
+            return None
+        elif l1 is None:
+            return l2:
+        elif l2 is None:
+            return l1
+        #Initialize head as smaller of l1/l2
+        if l1.val < l2.val:
+            self.head = l1 
+            l1 = l1.next
+        else: 
+            self.head = l2
+            l2 = l2.next
+        #Initialize tail
+        self.tail = self.head
         # Then go through both linked lists
-        while l1 and l2:
+        while l1 or l2:
+            # If one is empty just add the other and stop
+            if not l1:
+                self.tail.next = l2
+                break
+            elif not l2:
+                self.tail.next = l1
+                break
             # Check which node goes next, then add it to tail.
             if l1.val <= l2.val:
-                self.tail.insert_after(l1.val)
-                self.tail = self.tail.next
+                new_tail = ListNode(l1.val)
+                new_tail.next = None
+                self.tail.next = new_tail
+                self.tail = new_tail
                 l1 = l1.next
             else:
-                self.tail.insert_after(l2.val)
-                self.tail = self.tail.next
+                new_tail = ListNode(l2.val)
+                new_tail.next = None
+                self.tail.next = new_tail
+                self.tail = new_tail
                 l2 = l2.next
-        # This approach leaves a straggler, must evacuate the remnants.
-        while l1:
-            self.tail.insert_after(l1.val)
-            self.tail = self.tail.next
-            l1 = l1.next
-        while l2:
-            self.tail.insert_after(l2.val)
-            self.tail = self.tail.next
-            l2 = l2.next
 
-        # Purge Dummy Plug
-        while self.head and self.head.val == 'Dummy Plug':
-            self.head = self.head.next
         return self.head
