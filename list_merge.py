@@ -14,9 +14,7 @@ class Solution:
         The new list should be made by splicing together the nodes of the
         first two lists."""
         # Check for empty lists
-        if l1 is None and l2 is None:
-            return None
-        elif l1 is None:
+        if l1 is None:
             return l2:
         elif l2 is None:
             return l1
