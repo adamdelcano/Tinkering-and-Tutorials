@@ -17,23 +17,9 @@ class Solution:
         current_haystack_index = 0
 
         for letter in haystack:
-            # check if letter is in chunk, flag as useless if not
-            for chunk in possible_chunks:
-                if chunk[1] == target:
-                    return chunk[0]
-                if chunk[2] is False:
-                    continue
-                if letter == needle[chunk[1]]:
-                    chunk[1] += 1
-                else:
-                    chunk[2] = False
-            # If it's the start of needle, adds a chunk to start tracking
-            if letter == needle[0]:
-                chunk = [current_haystack_index, 1, True]
-                # Second check to catch last character in haystack
-                if chunk[1] == target:
-                    return chunk[0]
-                possible_chunks.append(chunk)
+            if haystack[
+                current_haystack_index:(current_haystack_index + target)
+            ] == needle:
+                return current_haystack_index
             current_haystack_index += 1
-
         return -1
