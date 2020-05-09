@@ -12,8 +12,6 @@ class Solution:
         if not needle or needle == haystack:
             return 0
         target = len(needle)
-        possible_chunks = []
-        needle_index = 0
         current_haystack_index = 0
 
         for letter in haystack:
@@ -22,4 +20,5 @@ class Solution:
             ] == needle:
                 return current_haystack_index
             current_haystack_index += 1
+
         return -1
