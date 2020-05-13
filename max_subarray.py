@@ -6,8 +6,6 @@ class Solution:
         current_sum = 0
         for num in nums:
             current_sum += num
-            if num > current_sum:
-                current_sum = num
-            if current_sum > largest_sum:
-                largest_sum = current_sum
+            current_sum = max(current_sum, num)
+            largest_sum = max(current_sum, largest_sum)
         return largest_sum
