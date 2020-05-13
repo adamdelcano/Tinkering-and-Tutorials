@@ -10,22 +10,20 @@
 
 class Solution:
     def countAndSay(self, n: int) -> str:
-        result = '1'
+        result = ['1']
         for counted_and_said in range(1, n):
-            temp_result = ''
+            temp_result = []
             last_char = ''
             freq = 0
             for character in result:
-                if character == last_char or last_char is '':
+                if character == last_char or last_char == '':
                     freq += 1
                     last_char = character
-                    current_block = (f'{freq}{last_char}')
                 else:
-                    temp_result += current_block
+                    temp_result.extend([str(freq), last_char])
                     freq = 1
                     last_char = character
-                    current_block = (f'{freq}{last_char}')
             # collect last block
-            temp_result += current_block
+            temp_result.extend([str(freq), last_char])
             result = temp_result
-        return result
+        return ''.join(result)
