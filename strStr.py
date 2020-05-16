@@ -9,16 +9,22 @@
 
 class Solution:
     def strStr(self, haystack: str, needle: str) -> int:
+        # input validation
         if not needle or needle == haystack:
             return 0
-        target = len(needle)
-        current_haystack_index = 0
-
-        for letter in haystack:
-            if haystack[
-                current_haystack_index:(current_haystack_index + target)
-            ] == needle:
-                return current_haystack_index
-            current_haystack_index += 1
-
+        # this is prob unnecessary but I think it's better than
+        # having it do them inside the loop?
+        needle_len = len(needle)
+        haystack_len = len(haystack)
+        # single character comparison
+        for index, letter in enumerate(haystack):
+            if (index + needle_len) > haystack_len:
+                break
+            if letter == needle[0]:
+                match = True  # I should not need this variable, I'm p sure
+                for needle_index, needle_letter in enumerate(needle):
+                    if haystack[index + needle_index] != needle_letter:
+                        match = False
+                if match:
+                    return index
         return -1
