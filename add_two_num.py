@@ -26,19 +26,11 @@ class Solution:
         l1 = l1.next
         l2 = l2.next
 
-        while l1 or l2 or carried_num:
-            # acquires values from l1/l2, validating
-            # would if: ... else be better here?
-            try:
-                first_num = l1.val
-            except AttributeError:
-                first_num = 0
-            try:
-                second_num = l2.val
-            except AttributeError:
-                second_num = 0
-            # the actual algorithm: add them, check if >9, carry 1 if so
-            next_num = first_num + second_num + carried_num
+        # Main loop to take out the main body
+        while l1 and l2:
+            # upside of this version: no input validation needed inside loop
+            # algo is p simple, just add the two and carry tens
+            next_num = l1.val + l2.val + carried_num
             carried_num = 0
             if next_num > 9:
                 next_num -= 10
@@ -49,13 +41,38 @@ class Solution:
             self.tail.next = new_tail
             self.tail = new_tail
             # advance the lists
-            try:
-                l1 = l1.next
-            except AttributeError:
-                pass
-            try:
-                l2 = l2.next
-            except AttributeError:
-                pass
+            l1 = l1.next
+            l2 = l2.next
+        # now to kill sin's left fin and right fin
+        while l1:
+            # basically the same loop
+            next_num = l1.val + carried_num
+            carried_num = 0
+            if next_num > 9:
+                next_num -= 10
+                carried_num = 1
+            new_tail = ListNode(next_num)
+            new_tail.next = None
+            self.tail.next = new_tail
+            self.tail = new_tail
+            l1 = l1.next
+        while l2:
+            # again basically the same loop
+            next_num = l2.val + carried_num
+            carried_num = 0
+            if next_num > 9:
+                next_num -= 10
+                carried_num = 1
+            new_tail = ListNode(next_num)
+            new_tail.next = None
+            self.tail.next = new_tail
+            self.tail = new_tail
+            l2 = l2.next
+        # take out the core
+        if carried_num:
+            new_tail = ListNode(carried_num)
+            new_tail.next = None
+            self.tail.next = new_tail
+            self.tail = new_tail
         # finish
         return self.head
