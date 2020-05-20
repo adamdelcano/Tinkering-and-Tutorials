@@ -26,10 +26,10 @@ class Solution:
         l1 = l1.next
         l2 = l2.next
 
-        # Main loop to take out the main body
+        # Loop to take out the main body
         while l1 and l2:
             # upside of this version: no input validation needed inside loop
-            # algo is p simple, just add the two and carry tens
+            # algo is pretty simple, just add the two and carry tens
             next_num = l1.val + l2.val + carried_num
             carried_num = 0
             if next_num > 9:
@@ -45,7 +45,7 @@ class Solution:
             l2 = l2.next
         # now to kill sin's left fin and right fin
         while l1:
-            # basically the same loop
+            # basically the same loop just without l2
             next_num = l1.val + carried_num
             carried_num = 0
             if next_num > 9:
@@ -57,7 +57,7 @@ class Solution:
             self.tail = new_tail
             l1 = l1.next
         while l2:
-            # again basically the same loop
+            # again basically the same loop without l1
             next_num = l2.val + carried_num
             carried_num = 0
             if next_num > 9:
@@ -68,7 +68,7 @@ class Solution:
             self.tail.next = new_tail
             self.tail = new_tail
             l2 = l2.next
-        # take out the core
+        # taking out the core is easy
         if carried_num:
             new_tail = ListNode(carried_num)
             new_tail.next = None
