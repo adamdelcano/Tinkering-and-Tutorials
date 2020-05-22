@@ -11,3 +11,12 @@ class Solution:
         for num in range(4, n + 1):
             last_sum, current_sum = current_sum, (current_sum + last_sum)
         return current_sum
+
+    def climbStairsRecurs(self, n: int) -> int:
+        # forgive the awkward naming
+        if n < 4:
+            return n
+        else:
+            return (
+                self.climbStairsRecurs(n - 1) + self.climbStairsRecurs(n - 2)
+            )
