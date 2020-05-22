@@ -21,10 +21,10 @@ class Solution:
             if (index + needle_len) > haystack_len:
                 break
             if letter == needle[0]:
-                match = True  # I should not need this variable, I'm p sure
                 for needle_index, needle_letter in enumerate(needle):
                     if haystack[index + needle_index] != needle_letter:
-                        match = False
-                if match:
+                        break
+                else:
                     return index
+
         return -1
