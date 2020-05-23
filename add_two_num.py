@@ -12,9 +12,17 @@ class Solution:
     def _append_node(self, num: int) -> None:
         """Given a number, makes a new ListNode and appends it to the tail."""
         new_tail = ListNode(num)
-        new_tail.next = None
         self.tail.next = new_tail
         self.tail = new_tail
+
+    def _process_num(self, num: int) -> (int, int):
+        """Given an integer, checks if it's over 10, then carries the tens
+        digit."""
+        carried_num = 0
+        if num > 9:
+            num -= 10
+            carried_num = 1
+        return (num, carried_num)
 
     def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
         """Given two non-empty linked lists representing two non-negative
@@ -25,38 +33,29 @@ class Solution:
         carried_num = 0
         # initialize head and tail and move other lists to next position
         self.head = ListNode(l1.val + l2.val)
-        if self.head.val > 9:
-            self.head.val -= 10
-            carried_num = 1
+        self.head.val, carried_num = self._process_num(self.head.val)
         self.tail = self.head
         l1 = l1.next
         l2 = l2.next
 
         # Loop to take out the main body
         while l1 and l2:
-            # upside of this version: no input validation needed inside loop
-            # algo is pretty simple, just add the two and carry tens
+            # add the numbers, process them, make new node with result
             next_num = l1.val + l2.val + carried_num
-            carried_num = 0
-            if next_num > 9:
-                next_num -= 10
-                carried_num = 1
+            next_num, carried_num = self._process_num(next_num)
             self._append_node(next_num)
             # advance the lists
             l1 = l1.next
             l2 = l2.next
-        # now to kill sin's left fin and right fin
+        # if one list is longer, this handles it
         survivor = l1 if l1 else l2
         while survivor:
-            # basically the same loop just without l2
+            # basically the same loop just only need to add carried_num
             next_num = survivor.val + carried_num
-            carried_num = 0
-            if next_num > 9:
-                next_num -= 10
-                carried_num = 1
+            next_num, carried_num = self._process_num(next_num)
             self._append_node(next_num)
             survivor = survivor.next
-        # taking out the core is easy
+        # if last digits add to more than ten 
         if carried_num:
             self._append_node(carried_num)
 
