@@ -9,12 +9,18 @@ class ListNode:
 
 
 class Solution:
+    def _append_node(self, num: int) -> None:
+        """Given a number, makes a new ListNode and appends it to the tail."""
+        new_tail = ListNode(num)
+        new_tail.next = None
+        self.tail.next = new_tail
+        self.tail = new_tail
+
     def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
-        # handle empty lists
-        if l1 is None:
-            return l2
-        elif l2 is None:
-            return l1
+        """Given two non-empty linked lists representing two non-negative
+        integers, that store the digits in reverse order, with each node
+        containing a single digit. This function adds the numbers and returns
+        it as a linked list."""
         # going to want to carry digits
         carried_num = 0
         # initialize head and tail and move other lists to next position
@@ -35,44 +41,24 @@ class Solution:
             if next_num > 9:
                 next_num -= 10
                 carried_num = 1
-            # make a new ListNode with the result and put it after tail
-            new_tail = ListNode(next_num)
-            new_tail.next = None
-            self.tail.next = new_tail
-            self.tail = new_tail
+            self._append_node(next_num)
             # advance the lists
             l1 = l1.next
             l2 = l2.next
         # now to kill sin's left fin and right fin
-        while l1:
+        survivor = l1 if l1 else l2
+        while survivor:
             # basically the same loop just without l2
-            next_num = l1.val + carried_num
+            next_num = survivor.val + carried_num
             carried_num = 0
             if next_num > 9:
                 next_num -= 10
                 carried_num = 1
-            new_tail = ListNode(next_num)
-            new_tail.next = None
-            self.tail.next = new_tail
-            self.tail = new_tail
-            l1 = l1.next
-        while l2:
-            # again basically the same loop without l1
-            next_num = l2.val + carried_num
-            carried_num = 0
-            if next_num > 9:
-                next_num -= 10
-                carried_num = 1
-            new_tail = ListNode(next_num)
-            new_tail.next = None
-            self.tail.next = new_tail
-            self.tail = new_tail
-            l2 = l2.next
+            self._append_node(next_num)
+            survivor = survivor.next
         # taking out the core is easy
         if carried_num:
-            new_tail = ListNode(carried_num)
-            new_tail.next = None
-            self.tail.next = new_tail
-            self.tail = new_tail
+            self._append_node(carried_num)
+
         # finish
         return self.head
