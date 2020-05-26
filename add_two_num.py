@@ -19,14 +19,14 @@ class Solution:
         self.tail.next = new_tail
         self.tail = new_tail
 
-    def _process_num(self, num: int) -> (int, int):
+    def _process_num(self, num: int) -> int:
         """Given an integer, checks if it's over 10, then carries the tens
         digit."""
         self.carried_num = 0
         if num > 9:
             num -= 10
             self.carried_num = 1
-        return num, self.carried_num
+        return num
 
     def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
         """Given two non-empty linked lists representing two non-negative
