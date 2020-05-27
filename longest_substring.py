@@ -6,30 +6,34 @@ class Solution:
         """Given a string, find the length of the longest substring without
         repeating characters."""
         longest_substring = 0
-        used_chars = {}
         current_substring = 0
-        anchor = 0
-        for index, char in enumerate(s):
-            # The anchor variable lets us skip useless stuff
-            if index < anchor:
+        # Store used characters as dict keys with their index for value
+        previous_characters = {}
+        # This speeds things up by letting us skip to next relevant section
+        next_starting_point = 0
+        # Loop over string. I only use the index, might want to change it?
+        for main_index, main_loop_character in enumerate(s):
+            # Skip until next starting point
+            if main_index < next_starting_point:
                 continue
-            # I swear there's a way to do this without nested loops
-            # but I've been trying all week halfassedly and I think
-            # at this point I'm better off submitting and seeing what
-            # you folks think. The inner loop is pretty self-explanatory
-            # I think- I'm happy with the idea of using dict but it
-            # tantalizes me with not resetting it and just doing one loop.
-            for check_index, check_char in enumerate(s[index:]):
-                if check_char in used_chars:
-                    anchor = used_chars[check_char] + 1
+            # Loop over slice of string starting with current position
+            for nested_index, character in enumerate(s[index:]):
+                # On finding a repeat, set new starting point to right after
+                # the character that got repeated (eg. if dv...d -> start at v)
+                # Then collect current substring length, reset substring and
+                # character dict and break out of nested loop.
+                if character in previous_characters:
+                    next_starting_point = previous_characters[character] + 1
                     longest_substring = max(
                         current_substring, longest_substring
                     )
-                    used_chars = {}
+                    previous_characters = {}
                     current_substring = 0
                     break
+                # If character isn't repeat add it to the dict and increment
+                # the count up by one.
                 else:
-                    used_chars[check_char] = check_index
+                    previous_characters[character] = nested_index
                     current_substring += 1
         # Collect final substring
         longest_substring = max(current_substring, longest_substring)
