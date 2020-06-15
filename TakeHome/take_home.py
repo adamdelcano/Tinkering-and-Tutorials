@@ -103,9 +103,48 @@ def get_industry_node(node_id: int):
 
 class TakeHome:
     def __init__(self):
-        """ Initializes a dictionary for sellers, and one for buyers """
+        """ Initializes a dictionary for sellers, their stats, and one
+        each for buyers and their stats"""
         self.sellers = {}
+        self.seller_stats = {}
         self.buyers = {}
+        self.buyer_stats = {}
+
+    def _calc_seller_stats(self) -> None:
+        """ Updates self.sellers to reflect current lowest, highest, average,
+        and median selling prices. """
+        # create a list of just the price information
+        selling_prices = [seller[0] for seller in self.sellers.values()]
+        # update dictionary
+        self.seller_stats = {
+            'low': min(selling_prices),
+            'high': max(selling_prices),
+            'average': statistics.mean(selling_prices),
+            'median': statistics.median(selling_prices)
+        }
+
+    def _calc_buyer_stats(self) -> None:
+        """ Updates the buyer_stats dictionary to track current lowest
+        of all lower limits, highest of all upper limits, and then calculate
+        the difference between each buyer's individual upper and lower limit,
+        storing the largest difference as widest spread, and the smallest
+        difference as narrowest. """
+        #  these are different lists so it seems more readable to assign
+        #  then make the dictionary, it also assumes lowest lower limit is
+        # lower than lowest upper limit, but I think this is safe.
+        low = min([buyer[0] for buyer in self.buyers.values()])
+        high = max([buyer[1] for buyer in self.buyers.values()])
+        #  the next two will be acting upon the same list
+        spread = [(buyer[1] - buyer[0]) for buyer in self.buyers.values()]
+        wide = max(spread)
+        narrow = min(spread)
+        # update dictionary
+        self.buyer_stats = {
+            'low': low,
+            'high': high,
+            'wide': wide,
+            'narrow': narrow
+        }
 
     def add_seller(
         self,
@@ -115,8 +154,10 @@ class TakeHome:
         industries: [int]
     ) -> None:
         """ Adds a seller with their name, selling price, geography which is
-        the US state they are located in, and list of industries """
+        the US state they are located in, and list of industries.
+        In addition, recalculates the overall seller stats."""
         self.sellers.setdefault(name, (selling_price, geography, industries))
+        self._calc_seller_stats()
 
     def add_buyer(
         self, name: str,
@@ -127,42 +168,24 @@ class TakeHome:
     ) -> None:
         """ Adds a buyer with the name, lower limit on price, upper limit on
         price, a list of US states they're willing to buy from, and the
-        industries that are relevant to them. """
+        industries that are relevant to them. Once that's done, recalculate
+        the stats based on this new version. """
         self.buyers.setdefault(
             name, (lower_limit, upper_limit, geographies, industries)
         )
+        self._calc_buyer_stats()
 
     def get_seller_stats(self) -> {}:
         """ From the set of all sellers, gets the lowest, highest, average,
         and median selling prices. """
-        selling_prices = [seller[0] for seller in self.sellers.values()]
-        return {
-            'low': min(selling_prices),
-            'high': max(selling_prices),
-            'average': statistics.mean(selling_prices),
-            'median': statistics.median(selling_prices)
-        }
+        return self.seller_stats
 
     def get_buyer_stats(self) -> {}:
         """ From the set of all buyers, gets the lowest lower limit on price,
         the highest upper limit on price, and then the widest (greatest
         difference) and narrowest (lowest difference) spread of each buyer's
         upper and lower price limits. """
-        #  these are different lists so it seems more readable to assign
-        #  then make dict, it also assumes lowest lower limit is lower than
-        #  lowest upper limit, but I think this is safe.
-        low = min([buyer[0] for buyer in self.buyers.values()])
-        high = max([buyer[1] for buyer in self.buyers.values()])
-        #  the next two will be acting upon the same list
-        spread = [(buyer[1] - buyer[0]) for buyer in self.buyers.values()]
-        wide = max(spread)
-        narrow = min(spread)
-        return {
-            'low': low,
-            'high': high,
-            'wide': wide,
-            'narrow': narrow
-        }
+        return self.buyer_stats
 
     def seller_recommendations(self, name: str) -> [str]:
         """ Given a seller's name, return the names of all the compatible
@@ -224,7 +247,6 @@ class TakeHome:
                         compatible_sellers.append(seller)
         return compatible_sellers  # return now-full list
 
-
     def transact(self, buyer_name: str, seller_name: str) -> None:
         """ Given a sellers and buyers name, it will remove both
         from the system. """
@@ -232,3 +254,9 @@ class TakeHome:
         if buyer_name in self.buyers and seller_name in self.sellers:
             del self.buyers[buyer_name]
             del self.sellers[seller_name]
+            self._calc_seller_stats()
+            self._calc_buyer_stats()
+        else:
+            print(
+                'Either buyer or seller not found. No transaction performed.'
+            )
