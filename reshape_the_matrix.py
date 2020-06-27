@@ -7,15 +7,18 @@ class Solution:
     into a different size of r rows and c columns while maintaining the
     elements in row-traversing order. If imposible returns original. """
     def matrixReshape(self, nums: List[List[int]], r: int, c: int) -> List[List[int]]:
-        elements = []  # will hold nums' elements
-        step = 0  # lets us keep track of place in elements
-        for row in nums:  # flatten nums into elements
-            elements.extend(row)
-        if len(elements) != (r * c):  # check if reshaping possible
-            return nums  # return original if not
-        while r > 0:  # might be better to do enumerate here?
-            # Actual loop is super simple, just convert that slice into list
-            elements[step:(c + step)] = [elements[step:(c + step)]]
-            step += 1  # we converted a whole slice into 1 element so only +1
-            r -= 1  # decrement r
-        return elements
+        step = 0
+        if len(nums) * len(nums[0]) != (r * c):  # check if reshaping possible
+            return nums  # return if not
+        # I don't want to admit how long it took me fumbling before just
+        # looking up the list flattening comprehension.
+        nums = [digit for row in nums for digit in row]
+        # This is inelegant but enumerate seems moreso
+        while r > 0:
+            # Convert a column-sized slice of nums into one column
+            nums[step:(c + step)] = [nums[step:(c + step)]]
+            # Step keeps us at the correct starting index
+            step += 1
+            # Decrement r so we end up doing this row number of times
+            r -= 1
+        return nums
