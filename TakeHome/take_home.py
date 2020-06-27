@@ -63,6 +63,7 @@ Notes:
 """
 import csv
 import statistics
+import bisect
 
 INDUSTRY_INDEX = {}
 
@@ -101,20 +102,57 @@ def get_industry_node(node_id: int):
     return INDUSTRY_INDEX.get(node_id)
 
 
+class Seller:
+    """
+    Container object for sellers. Has name, selling price, geography which is
+    the US state they are located in, and list of industries.
+    """
+    def __init__(
+        self, name: str, selling_price: int, geography: str,
+        industries: [int]
+    ) -> None:
+        # Name is usual mapping but not only option
+        self.name = name
+        self.selling_price = selling_price
+        self.geography = geography
+        self.industries = industries
+
+
+class Buyer:
+    """
+    Container object for seller. Has name, lower limit on price, upper limit
+    on price, a list of US states they're willing to buy from, and the
+    industries that are relevant to them.
+    """
+    def __init__(
+        self, name: str, lower_limit: int, upper_limit: int,
+        geographies: [str], industries: [int]
+    ) -> None:
+        self.name = name  # Possibly redundant but useful for mapping
+        self.lower_limit = lower_limit
+        self.upper_limit = upper_limit
+        self.geographies = geographies
+        self.industries = industries
+
+
 class TakeHome:
     def __init__(self):
         """ Initializes a dictionary for sellers, their stats, and one
         each for buyers and their stats"""
         self.sellers = {}
         self.seller_stats = {}
+        self.seller_geo_map = {}
         self.buyers = {}
         self.buyer_stats = {}
+        self.buyer_geo_map = {}
 
     def _calc_seller_stats(self) -> None:
         """ Updates self.sellers to reflect current lowest, highest, average,
         and median selling prices. """
         # create a list of just the price information
-        selling_prices = [seller[0] for seller in self.sellers.values()]
+        selling_prices = [
+            seller.selling_price for seller in self.sellers.values()
+        ]
         # update dictionary
         self.seller_stats = {
             'low': min(selling_prices),
@@ -132,10 +170,13 @@ class TakeHome:
         #  these are different lists so it seems more readable to assign
         #  then make the dictionary, it also assumes lowest lower limit is
         # lower than lowest upper limit, but I think this is safe.
-        low = min([buyer[0] for buyer in self.buyers.values()])
-        high = max([buyer[1] for buyer in self.buyers.values()])
+        low = min([buyer.lower_limit for buyer in self.buyers.values()])
+        high = max([buyer.upper_limit for buyer in self.buyers.values()])
         #  the next two will be acting upon the same list
-        spread = [(buyer[1] - buyer[0]) for buyer in self.buyers.values()]
+        spread = [
+            (buyer.upper_limit - buyer.lower_limit) for buyer
+            in self.buyers.values()
+        ]
         wide = max(spread)
         narrow = min(spread)
         # update dictionary
@@ -156,7 +197,12 @@ class TakeHome:
         """ Adds a seller with their name, selling price, geography which is
         the US state they are located in, and list of industries.
         In addition, recalculates the overall seller stats."""
-        self.sellers.setdefault(name, (selling_price, geography, industries))
+        new_seller = Seller(name, selling_price, geography, industries)
+        self.sellers.setdefault(new_seller.name, new_seller)
+        if self.seller_geo_map.get(new_seller.geography):
+            self.seller_geo_map[new_seller.geography].append(new_seller.name)
+        else:
+            self.seller_geo_map[new_seller.geography] = [new_seller.name]
         self._calc_seller_stats()
 
     def add_buyer(
@@ -170,9 +216,19 @@ class TakeHome:
         price, a list of US states they're willing to buy from, and the
         industries that are relevant to them. Once that's done, recalculate
         the stats based on this new version. """
-        self.buyers.setdefault(
-            name, (lower_limit, upper_limit, geographies, industries)
+        # Instantiate new buyer
+        new_buyer = Buyer(
+            name, lower_limit, upper_limit, geographies, industries
         )
+        # Add to main mapping by name
+        self.buyers.setdefault(new_buyer.name, new_buyer)
+        # Add it to each list in corresponding geographical mapping
+        for geography in new_buyer.geographies:
+            if self.buyer_geo_map.get(geography):
+                bisect.bisect_left(
+                    self.buyer_geo_map[geography], ((new_buyer.name, new_buyer.lower_limit))
+            else:
+                self.buyer_geo_map[geography] = [(new_buyer.name, new_buyer.lower_limit)]
         self._calc_buyer_stats()
 
     def get_seller_stats(self) -> {}:
@@ -197,24 +253,22 @@ class TakeHome:
         any of the seller's industries. """
         compatible_buyers = []
         seller = self.sellers[name]
-        # loop through the buyer dictionary
-        for buyer in self.buyers:
+        # loop through the buyers in target location
+        for buyer in self.buyer_geo_map.get(seller.geography):
             current_buyer = self.buyers[buyer]
-            # check location
-            if seller[1] in current_buyer[2]:
-                # check limits
-                if current_buyer[0] <= seller[0] <= current_buyer[1]:
-                    # check industries
-                    if seller[2] in current_buyer[3]:
-                        # add name, note that this is buyer not current_buyer
-                        compatible_buyers.append(buyer)
-                    # check child industries only if no industry match
-                    elif seller[2] in [
-                        get_industry_node(industry)['children_ids']
-                        for industry in current_buyer[3]
-                    ]:
-                        # add name, note that this is buyer not current_buyer
-                        compatible_buyers.append(buyer)  # add name
+            # check limits
+            if current_buyer.lower_limit <= seller.selling_price <= current_buyer.upper_limit:
+                # check industries
+                if seller.industries in current_buyer.industries:
+                    # add name, note that this is buyer not current_buyer
+                    compatible_buyers.append(buyer)
+                # check child industries only if no industry match
+                elif seller.industries in [
+                    get_industry_node(industry)['children_ids']
+                    for industry in current_buyer.industries
+                ]:
+                    # add name, note that this is buyer not current_buyer
+                    compatible_buyers.append(buyer)  # add name
         return compatible_buyers  # return the now-full list
 
     def buyer_recommendations(self, name: str) -> [str]:
@@ -231,15 +285,15 @@ class TakeHome:
         for seller in self.sellers:
             current_seller = self.sellers[seller]
             # check location
-            if current_seller[1] in buyer[2]:
+            if current_seller.geography in buyer.geographies:
                 # check limits
-                if buyer[0] <= current_seller[0] <= buyer[1]:
+                if buyer.lower_limit <= current_seller.selling_price <= buyer.upper_limit:
                     # check industries
-                    if current_seller[2] in buyer[3]:
+                    if current_seller.industries in buyer.industries:
                         # add name, note this is seller not current_seller
                         compatible_sellers.append(seller)
                         # check child industries only if no industry match
-                    elif current_seller[2] in [
+                    elif current_seller.industries in [
                         get_industry_node(industry)['children_ids']
                         for industry in current_buyer[3]
                     ]:
