@@ -11,26 +11,43 @@ class Solution:
         # Set up point where median will be
         halfway = (len(nums_1) + len(nums_2)) / 2
         # Initialize num_1 and num_2 and main_list
-        num_1 = float(-inf)
-        num_2 = float(-inf)
+        try:
+            num_1 = nums_1.pop()
+        except IndexError:
+            num_1 = None
+        try:
+            num_2 = nums_2.pop()
+        except IndexError:
+            num_2 = None
         main_list = []  # Could hypothetically implement counter and not store
         # Loop to populate main_list from arrays
         while len(main_list) <= halfway:  # Don't go further than needed
-            # Compare num_1, num_2, add larger to list and reset it to -inf
-            if num_1 >= num_2:
-                if num_1 == float(-inf):  # check if variables initialized
-                    pass
-                else:
-                    main_list.append(num_1)
-                    num_1 = float(-inf)
+            # check for empty lists
+            if num_1 is not None and num_2 is None:
+                main_list.append(num_1)
+                try:
+                    num_1 = nums_1.pop()
+                except IndexError:
+                    num_1 = None
+            elif num_1 is None and num_2 is not None:
+                main_list.append(num_2)
+                try:
+                    num_2 = nums_2.pop()
+                except IndexError:
+                    num_2 = None
+            # now compare
+            elif num_1 >= num_2:
+                main_list.append(num_1)
+                try:
+                    num_1 = nums_1.pop()
+                except IndexError:
+                    num_1 = None
             elif num_2 > num_1:
                 main_list.append(num_2)
-                num_2 = float(-inf)
-            # Pop end off non-empty lists to replace -inf variables
-            if num_1 == float(-inf) and nums_1:
-                num_1 = nums_1.pop()
-            if num_2 == float(-inf) and nums_2:
-                num_2 = nums_2.pop()
+                try:
+                    num_2 = nums_2.pop()
+                except IndexError:
+                    num_2 = None
         # Check whether last or average of last two needed, return that
         if halfway % 1 == 0:
             return ((main_list.pop() + main_list.pop()) / 2)
