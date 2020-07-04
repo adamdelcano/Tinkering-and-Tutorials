@@ -14,13 +14,37 @@ class Solution:
         # check if it can be reshaped
         if (original_r * original_c) != (r * c):
             return nums
-        # create a new empty matrix to populate
-        new_list = [[0] * c for row in range(r)]
-        for row_index, row in enumerate(nums):
-            for column_index, num in enumerate(row):
-                # I EXTREMELY did not think of this math myself
-                flattened = ((original_c * row_index) + column_index)
-                target_r = flattened // c
-                target_c = flattened % c
-                new_list[target_r][target_c] = num
-        return new_list
+        # if there are more columns in the new rows, can iterate easily
+        if c >= original_c:
+            # assign correct indices to everything
+            for row_index, row in enumerate(nums):
+                for column_index, num in enumerate(row):
+                    # I EXTREMELY did not think of this math myself
+                    flattened = ((original_c * row_index) + column_index)
+                    target_r = flattened // c
+                    target_c = flattened % c
+                    print(target_r, target_c)
+                    try:
+                        nums[target_r][target_c] = num
+                    except IndexError:
+                        nums[target_r].append(num)
+            # cull nonexistent rows
+            del nums[r:]
+        # If there are fewer columns, we need to make a container to store
+        # numbers that we haven't gotten to yet
+        else:
+            # create a container list for rows
+            current_row = []
+            # iterate over nums, collecting until current_row is full then
+            # assigning it.
+            for index in range(r):
+                try:
+                    row = current_row + nums[index]
+                    current_row = row[c:]
+                    row = row[:c]
+                    nums[index] = row
+                except IndexError:
+                    row = current_row[:c]
+                    current_row = current_row[c:]
+                    nums.append(row)
+        return nums
