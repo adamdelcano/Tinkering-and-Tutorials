@@ -10,41 +10,27 @@ class Solution:
         self, nums: List[List[int]], r: int, c: int
     ) -> List[List[int]]:
         original_r = len(nums)
-        original_c = len(nums[0])
+        original_c = len(nums[0])        
         # check if it can be reshaped
         if (original_r * original_c) != (r * c):
             return nums
-        # if there are more columns in the new rows, can iterate easily
-        if c >= original_c:
-            # assign correct indices to everything
-            for row_index, row in enumerate(nums):
-                for column_index, num in enumerate(row):
-                    # I EXTREMELY did not think of this math myself
-                    flattened = ((original_c * row_index) + column_index)
-                    target_r = flattened // c
-                    target_c = flattened % c
-                    print(target_r, target_c)
-                    try:
-                        nums[target_r][target_c] = num
-                    except IndexError:
-                        nums[target_r].append(num)
-            # cull nonexistent rows
-            del nums[r:]
-        # If there are fewer columns, we need to make a container to store
-        # numbers that we haven't gotten to yet
-        else:
-            # create a container list for rows
-            current_row = []
-            # iterate over nums, collecting until current_row is full then
-            # assigning it.
-            for index in range(r):
-                try:
-                    row = current_row + nums[index]
-                    current_row = row[c:]
-                    row = row[:c]
-                    nums[index] = row
-                except IndexError:
-                    row = current_row[:c]
-                    current_row = current_row[c:]
-                    nums.append(row)
+        # do this like I did the stocks problems with a container and
+        # a condition to reset it
+        temp_row = []
+        index = 0
+        for row in nums:
+            temp_row += row
+            # once the temporary row is full, dump it
+            if len(temp_row) >= c:
+                nums[index] = temp_row[:c]
+                index += 1
+                temp_row = temp_row[c:]
+        # if there are more rows in the new matrix temp_row will have
+        # stuff in after iterating through, this adds it at the end in
+        # column-sized chunks.
+        while len(temp_row) >= c:
+            nums.append(temp_row[:c])
+            temp_row = temp_row[c:]
+        # cull the rows past where they were any
+        del nums[r:]
         return nums
