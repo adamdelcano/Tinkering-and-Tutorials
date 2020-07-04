@@ -6,17 +6,21 @@ class Solution:
     """ Implements matlab's reshape function: given a matrix nums, reshapes it
     into a different size of r rows and c columns while maintaining the
     elements in row-traversing order. If imposible returns original. """
-    def matrixReshape(self, nums: List[List[int]], r: int, c: int) -> List[List[int]]:
-        if len(nums) * len(nums[0]) != (r * c):  # check if reshaping possible
-            return nums  # return if not
-        # I don't want to admit how long it took me fumbling before just
-        # looking up the list flattening comprehension.
-        nums = [digit for row in nums for digit in row]
-        # Enumerate lets me have an incrementing counter
-        for index, item in enumerate(nums):
-            # Convert a column-sized slice of nums into one column
-            nums[index:(c + index)] = [nums[index:(c + index)]]
-            # Stop when at breakpoint
-            if index == r:
-                break
-        return nums
+    def matrixReshape(
+        self, nums: List[List[int]], r: int, c: int
+    ) -> List[List[int]]:
+        original_r = len(nums)
+        original_c = len(nums[0])
+        # check if it can be reshaped
+        if (original_r * original_c) != (r * c):
+            return nums
+        # create a new empty matrix to populate
+        new_list = [[0] * c for row in range(r)]
+        for row_index, row in enumerate(nums):
+            for column_index, num in enumerate(row):
+                # I EXTREMELY did not think of this math myself
+                flattened = ((original_c * row_index) + column_index)
+                target_r = flattened // c
+                target_c = flattened % c
+                new_list[target_r][target_c] = num
+        return new_list
