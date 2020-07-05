@@ -108,12 +108,12 @@ class Seller:
     the US state they are located in, and list of industries.
     """
     def __init__(
-        self, name: str, selling_price: int, geography: str,
+        self, name: str, sell_price: int, geography: str,
         industries: [int]
     ) -> None:
         # Name is usual mapping but not only option
         self.name = name
-        self.selling_price = selling_price
+        self.sell_price = sell_price
         self.geography = geography
         self.industries = industries
 
@@ -150,15 +150,15 @@ class TakeHome:
         """ Updates self.sellers to reflect current lowest, highest, average,
         and median selling prices. """
         # create a list of just the price information
-        selling_prices = [
-            seller.selling_price for seller in self.sellers.values()
+        sell_prices = [
+            seller.sell_price for seller in self.sellers.values()
         ]
         # update dictionary
         self.seller_stats = {
-            'low': min(selling_prices),
-            'high': max(selling_prices),
-            'average': statistics.mean(selling_prices),
-            'median': statistics.median(selling_prices)
+            'low': min(sell_prices),
+            'high': max(sell_prices),
+            'average': statistics.mean(sell_prices),
+            'median': statistics.median(sell_prices)
         }
 
     def _calc_buyer_stats(self) -> None:
@@ -190,14 +190,14 @@ class TakeHome:
     def add_seller(
         self,
         name: str,
-        selling_price: int,
+        sell_price: int,
         geography: str,
         industries: [int]
     ) -> None:
         """ Adds a seller with their name, selling price, geography which is
         the US state they are located in, and list of industries.
         In addition, recalculates the overall seller stats."""
-        new_seller = Seller(name, selling_price, geography, industries)
+        new_seller = Seller(name, sell_price, geography, industries)
         self.sellers.setdefault(new_seller.name, new_seller)
         if self.seller_geo_map.get(new_seller.geography):
             self.seller_geo_map[new_seller.geography].append(new_seller.name)
@@ -226,9 +226,12 @@ class TakeHome:
         for geography in new_buyer.geographies:
             if self.buyer_geo_map.get(geography):
                 bisect.bisect_left(
-                    self.buyer_geo_map[geography], ((new_buyer.name, new_buyer.lower_limit))
+                    self.buyer_geo_map[geography],
+                    ((new_buyer.name, new_buyer.lower_limit)))
             else:
-                self.buyer_geo_map[geography] = [(new_buyer.name, new_buyer.lower_limit)]
+                self.buyer_geo_map[geography] = [
+                    (new_buyer.name, new_buyer.lower_limit)
+                ]
         self._calc_buyer_stats()
 
     def get_seller_stats(self) -> {}:
@@ -253,22 +256,21 @@ class TakeHome:
         any of the seller's industries. """
         compatible_buyers = []
         seller = self.sellers[name]
-        # loop through the buyers in target location
-        for buyer in self.buyer_geo_map.get(seller.geography):
-            current_buyer = self.buyers[buyer]
+        # loop through the buyers in target location. current_buyer is used to
+        # differentiate between the variables while still hopefully clear?
+        for current_buyer in self.buyer_geo_map.get(seller.geography):
+            buyer = self.buyers[current_buyer]
             # check limits
-            if current_buyer.lower_limit <= seller.selling_price <= current_buyer.upper_limit:
-                # check industries
-                if seller.industries in current_buyer.industries:
-                    # add name, note that this is buyer not current_buyer
-                    compatible_buyers.append(buyer)
-                # check child industries only if no industry match
-                elif seller.industries in [
+            if buyer.lower_limit <= seller.sell_price <= buyer.upper_limit:
+                # Check industries - as Zach has pointed out checking if
+                # the main node is in in without checking the children is
+                # probably a waste of time.
+                if seller.industries in [
                     get_industry_node(industry)['children_ids']
-                    for industry in current_buyer.industries
+                    for industry in buyer.industries
                 ]:
-                    # add name, note that this is buyer not current_buyer
-                    compatible_buyers.append(buyer)  # add name
+                    # add name, note that this is full_buyer not current_buyer
+                    compatible_buyers.append(current_buyer)  # add name
         return compatible_buyers  # return the now-full list
 
     def buyer_recommendations(self, name: str) -> [str]:
@@ -281,24 +283,23 @@ class TakeHome:
         buyer's industries. """
         buyer = self.buyers[name]
         compatible_sellers = []
-        # loop through sellers dict
-        for seller in self.sellers:
-            current_seller = self.sellers[seller]
+        # loop through sellers dict. current_seller is used to differentiate
+        # between the name in the list and the object
+        for current_seller in self.sellers:
+            seller = self.sellers[seller]
             # check location
-            if current_seller.geography in buyer.geographies:
+            if seller.geography in buyer.geographies:
                 # check limits
-                if buyer.lower_limit <= current_seller.selling_price <= buyer.upper_limit:
-                    # check industries
-                    if current_seller.industries in buyer.industries:
-                        # add name, note this is seller not current_seller
-                        compatible_sellers.append(seller)
-                        # check child industries only if no industry match
-                    elif current_seller.industries in [
+                if buyer.lower_limit <= seller.sell_price <= buyer.upper_limit:
+                    # Check industries. Per discussion, check children_node
+                    # since main will be contained in it, two checks not worth
+                    # it in realistic use cases.
+                    if seller.industries in [
                         get_industry_node(industry)['children_ids']
-                        for industry in current_buyer[3]
+                        for industry in buyer[3]
                     ]:
-                        # add name, note this is seller not current_seller
-                        compatible_sellers.append(seller)
+                        # add name, note this is current_seller not seller
+                        compatible_sellers.append(current_seller)
         return compatible_sellers  # return now-full list
 
     def transact(self, buyer_name: str, seller_name: str) -> None:
@@ -306,11 +307,28 @@ class TakeHome:
         from the system. """
         # check to make sure both exist first
         if buyer_name in self.buyers and seller_name in self.sellers:
+            # Go to each geography buyer is in and remove it from the mapping
+            for geography in self.buyers[buyer_name].geographies:
+                self.buyer_geo_map[geography].remove(buyer_name)
+            # name mapping is easy to clear but should be last to be removed
+            # so that any other mappings can reference it
             del self.buyers[buyer_name]
+            # sellers only have one geography so no loop needed to clear
+            # but it is somewhat hideous - it might be worth assigning
+            # a variable 'geography' to be self.sellers[seller_name].geography
+            # to make things more legible.
+            self.seller_geo_map[
+                self.sellers[seller_name].geography
+            ].remove(seller_name)
+            # remove seller name from mapping
             del self.sellers[seller_name]
+            # recalc stats
             self._calc_seller_stats()
             self._calc_buyer_stats()
+        # if buyer or seller aren't found, print appropriate message
+        elif buyer_name not in self.buyers and seller_name in self.sellers:
+            print('Buyer not found. Transaction not performed.')
+        elif buyer_name in self.buyers and seller_name not in self.sellers:
+            print("Seller not found. Transaction not performed.")
         else:
-            print(
-                'Either buyer or seller not found. No transaction performed.'
-            )
+            print("Buyer and seller not found. Transaction not performed")
