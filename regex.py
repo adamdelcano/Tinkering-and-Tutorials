@@ -1,5 +1,6 @@
 # for https://leetcode.com/problems/regular-expression-matching/
 
+
 class Solution:
     def isMatch(self, s: str, p: str) -> bool:
         """ Given an input string (s) and a pattern (p), implement regular
@@ -9,12 +10,12 @@ class Solution:
         The matching should cover the entire input string (not partial)."""
         # Track current furthest matching checked index in input string s
         s_index = 0
-        # Track last non-* match index, since * makes things complicated
-        prev_s_index = 0
+        # Dict of starting points and truth values. If the s[-1] is in it and
+        # True at the end of the process then it's a match
+        valid_paths = {-1: True}        
         # I believe assigning this as a variable is worth mem cost vs speed
-        s_end = len(s) - 1
-        # loop through the pattern matching string in 2-character slices
-        # this lets us check for * without using too much overhead
+        s_end = len(s)
+        # loop through the pattern matching string
         for index, letter in enumerate(p):
             # if it starts with * we can skip
             if letter == '*':
@@ -29,29 +30,20 @@ class Solution:
                     any_num_flag = False
             except IndexError:
                 any_num_flag = False
-            # if it's a regular character or . we can check simply
+            # we're going to check against every valid path because
+            # backtracking is more annoying and there are at least
+            # edge cases where this could hypothetically be cool
             if any_num_flag is False:
-                # tuple here lets us check both, fancy
-                if letter in (s[s_index], '.'):
-                    prev_s_index = s_index
-                    s_index += 1
-                # check against the last two characters pre-*, this could
-                # be one elif with a tuple but each needs different action so
-                # diffentiation is worthwhile.
-                elif letter == s[prev_s_index]:
-                    s_index = prev_s_index + 1
-                elif letter == s[prev_s_index + 1]:
-                    match = True
-                    prev_s_index += 1
-                    s_index = prev_s_index + 1
-                # Not match? THEN DIE!
-                else:
-                    print(f'Failure: {letter} did not match {s[s_index]}')
-                    print(f'It also didn\'t match {s[prev_s_index]}')
-                    print(f'or {s[prev_s_index + 1]}.')
-                    return False
+                for path in valid_paths:
+                    if path is True and path + 1 < s_end:
+                        if letter in (s[path + 1], '.'):
+                            valid_paths[path + 1] = True
+                        else:
+                            valid_paths[path + 1] = False
+                
+
             # if the * flag is up, we update the furthest checked s_index
-            # but not prev_s_index because that's the whole point of it.
+            # but not starting_points because that's the whole point of it.
             elif any_num_flag is True:
                 while s_index <= s_end and letter in (s[s_index], '.'):
                     s_index += 1
