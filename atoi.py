@@ -15,48 +15,36 @@ class Solution:
         because either str is empty or it contains only whitespace characters,
         no conversion is performed. If no valid conversion could be performed,
         a zero value is returned. """
-        initial_index = False  # no starting index yet
-        substring = ''  # track substring
-        for index, char in enumerate(string):
-            # ignore whitespace characters before non-whitespace is found
-            if char == ' ' and initial_index is False:
-                pass  # continue funtionally the same here I think?
-            # first non-whitespace character found!
-            elif char != ' ' and initial_index is False:
-                try:
-                    int(char)
-                except ValueError:
-                    if char == '-':
-                        pass
-                    elif char == '+':
-                        pass
-                    else:
-                        return 0
-                initial_index = index
+        i = 0  # this is the integer we'll be constructing
+        neg_flag = False  # this could be 1 instead and *= -1 to switch
+        int_max = 2**31 - 1
+        int_min = -2**31
+        started = False
+        a = string.lstrip()   # work with a string with removed whitespace
+        for char in a:
+            # test if char is number, add to i if so
+            if char.isnumeric() and i == 0 and started is False:
+                i = int(char)
+                started = True
+            elif char.isnumeric():
+                i *= 10
+                i += int(char)
+            # special case to handle +/-, can be expanded to handle \t, \r, \n
+            # using an escape flag and some extra elifs
+            elif char.isnumeric() is False and i == 0 and started is False:
+                if char == '-':
+                    started = True
+                    neg_flag = True
+                elif char == '+':
+                    started = True
+                else:
+                    return 0
             # now go until you hit something not an integer
             else:
-                try:
-                    int(char)
-                except ValueError:
-                    # then slice from initial_index to that point
-                    substring = string[initial_index:index]
-                    break
-        # if string ends in an integer make the slice
-        if substring == '' and initial_index is not False:
-            substring = string[initial_index:]
-        # if the string was just all whitespace or something
-        elif substring == '' and initial_index is False:
-            return 0
-        # now to keep it within the bounds it's asking for
-        try:
-            # This is the unreadable but pleasing one-liner
-            # return min((2**31 - 1), max(-2**31, int(substring)))
-            substring = int(substring)
-        except ValueError:  # sometimes the string is '+' and we gotta deal
-            return 0
-        if substring > 2**31 - 1:  # upper bound check
-            return 2**31 - 1
-        elif substring < -2**31:  # lower bound check
-            return -2**31
-        else:
-            return substring  # the finish line
+                break
+        # if the neg_flag was 1/-1 we could just always i *= neg_flag but I
+        # think that opens the door for more unexpected behavior down the line
+        # than this conditional
+        if neg_flag is True:
+            i *= -1
+        return min(max(int_min, i), int_max)
