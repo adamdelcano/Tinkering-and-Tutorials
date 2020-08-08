@@ -30,7 +30,7 @@ class Solution:
             # if a[0] in ('+', '-'):
             #     if a[0] == '-':
             #         neg_flag = True
-            #     a = a[1:
+            #     a = a[1:]
             if a[0] == '-':
                 neg_flag = True
                 a = a[1:]
