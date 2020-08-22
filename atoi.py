@@ -1,6 +1,9 @@
 # for https://leetcode.com/problems/string-to-integer-atoi/
 
 class Solution:
+    INT_MAX = 2**31 - 1
+    INT_MIN = -2**31
+
     def myAtoi(self, string: str) -> int:
         """ Implement atoi which converts a string to an integer.
         The function first discards as many whitespace characters as necessary
@@ -17,9 +20,7 @@ class Solution:
         a zero value is returned. """
         i = 0  # this is the integer we'll be constructing
         neg_flag = False  # this could be 1 instead and *= -1 to switch
-        int_max = 2**31 - 1
-        int_min = -2**31
-        a = string.lstrip()   # work with a string with removed whitespace
+        stripped_string = string.lstrip()   # remove whitespace
         try:
             # Not sure which version is more readable, have commented one out.
             # They don't seem to make a difference in runtime on leetcode.
@@ -27,18 +28,18 @@ class Solution:
             # check so not relevant, just a matter of which looks better to
             # the human eye.
             #
-            # if a[0] in ('+', '-'):
-            #     if a[0] == '-':
+            # if stripped_string[0] in ('+', '-'):
+            #     if stripped_string[0] == '-':
             #         neg_flag = True
-            #     a = a[1:]
-            if a[0] == '-':
+            #     stripped_string = stripped_string[1:]
+            if stripped_string[0] == '-':
                 neg_flag = True
-                a = a[1:]
-            elif a[0] == '+':
-                a = a[1:]
+                stripped_string = stripped_string[1:]
+            elif stripped_string[0] == '+':
+                stripped_string = stripped_string[1:]
         except IndexError:
             return 0
-        for char in a:
+        for char in stripped_string:
             # test if char is number, add to i if so
             if char.isnumeric():
                 i *= 10
@@ -51,4 +52,4 @@ class Solution:
         # than this conditional
         if neg_flag is True:
             i *= -1
-        return min(max(int_min, i), int_max)
+        return min(max(self.INT_MIN, i), self.INT_MAX)
