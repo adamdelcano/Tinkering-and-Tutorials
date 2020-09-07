@@ -1,0 +1,121 @@
+Intermediate Python Notes
+----------------------
+List can contain multiple data types, duplicate elements.
+list.insert(index, value) lets you insert items into list at index
+list.remove(value) lets you kill them (valueerror if not in list)
+list.clear() empties list
+sorted(list) returns a sorted copy of list
+mylist = [0] * 5 will make [0,0,0,0,0]
+slice syntax: [start index : stop index : step]
+mylist = [1,2,3,4,5,6,7,8,9,10]
+mylist[1:5] = [2,3,4,5]
+
+copy_mylist = mylist
+copy_mylist.append(11)
+mylist will now have 11 at the end
+because both list variabless refer to the same list in the memory
+copy_mylist = mylist.copy() or list(mylist) or mylist[:] all make copies that you can modify
+-----------------------
+tuples: immutable data type, is created by parentheses with common
+mytuple = ("Max", 28, "Boston")
+technically parentheses optional
+mytuple = "Max", 28, "Boston" is valid
+mytuple = "Max" is a string
+so is mytuple = ("Max")
+but mytuple = "Max", is valid
+tuple(item) makes a tuple out of iterator
+access them with index (mytuple[1] will get 28)
+tuple.count(value) counts the number of value in tuple
+tuple.index(value) returns the first index of value in tuple, will return ValueError if not in tuple
+list(tuple) makes list, tuple(list) makes tuple
+
+my_tuple = (0, 1, 2, 3, 4)
+i1, *i2, i3 = my_tuple
+i1 == 0
+i2 == 1,2,3
+i3 == 4
+---------------
+dicts: unordered, mutable, key:value
+to merge two dicts,
+my_dict = {"name",:"Max", "age":28, "email":"max@xyz.com"}
+my_dict_2 = dict(name="Mary", age=27, city = "Boston")
+my_dict.update(my_dict_2)
+
+my_dict == {'name': 'Mary', 'age': 27, 'email': 'max@xyz.com', 'city': 'Boston'}
+
+can't make mutable things keys
+-------------
+set: unordered, mutable, no dupes
+myset = {1,2,3,1,2}
+myset == {1,2,3}
+myset = set("Hello")
+myset == {'o', 'l', 'e', 'H'}
+myset = {}
+type(myset) == dict
+myset = set()
+type(myset) == set
+myset.add(value) adds value to set
+myset.discard(value) takes it out and ignores if not found
+myset.pop() returns an arbitrary element while popping it out
+you can iterate over it with a for loop 
+
+unions and intersection of sets
+odds = {1,3,5,7,9}
+evens = {0,2,4,6,8}
+primes = {2,3,5,7}
+
+u = odds.union(evens) 
+u == {0,1,2,3,4,5,6,7,8,9}
+i = odds.intersection(evens)
+i == set()
+op = odds.intersection(primes)
+op == {3,5,7}
+ip = primes.intersection(evens)
+ip == {2}
+
+diff = primes.difference(odds)
+diff == {2}
+diff = odds.difference(primes)
+diff == {1,9}
+sym_diff = odds.symmetric_difference(primes)
+sym_diff == {1,2}
+sym_diff = primes.symmetric_difference(odds)
+sym_dif == {1,2}
+
+odds.update(primes)
+odds == {1,2,3,5,7,9}
+odds.intersection_update(evens)  # keeps only the stuff in both sets
+odds == {2]}
+
+odds = {1,3,5,7,9}
+odds.difference_update(primes)  # removes elements from the other set
+odds == {1}
+also a symmetric difference version
+
+set,issubset(other_set)  # returns True if all of set is in other_set
+set.issuperset(other_set)  # returns True if all of other_set is in set
+set.isdisjoint(other_set)  # returns True if there are no interesections, that is they have no elements in common
+
+
+remember that simple assignment means the set has another name, it doesn't make a copy!
+other_set = set.copy()
+or
+other_set = set(set)
+
+Frozenset is immutable version of set
+a = frozenset([1,2,3,4])
+can't update
+
+--------------
+
+Strings
+ordered and immutable collection data type
+my_string = 'Hello World'
+my_string.startswith('H') == True
+my_string.startswith('Hello') == True
+my_string.startswith('W') == False
+my_string.find('l') == 2
+my_string.count('o') == 2, my_string.count('p') == 0
+new_string = my_string.replace('World', 'Universe')
+my_string == 'Hello World'
+new_string == 'Hello Universe'
