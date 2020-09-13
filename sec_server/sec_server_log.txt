@@ -567,3 +567,13 @@ INFO:aiohttp.access:127.0.0.1 [12/Sep/2020:18:58:32 +0000] "POST / HTTP/1.1" 200
 2020-01-10   311.658194    45.635845    69.677766   219.532068
 2020-01-13   311.658194    45.635845    69.677766   219.532068
 2020-09-12 15:29:06,867 127.0.0.1 [12/Sep/2020:19:29:06 +0000] "POST / HTTP/1.1" 200 1300 "-" "curl/7.54.0"
+2020-09-13 17:56:05,789 127.0.0.1 [13/Sep/2020:21:56:05 +0000] "GET / HTTP/1.1" 200 558 "-" "curl/7.54.0"
+2020-09-13 17:56:59,460 Received <Request GET / > non-post request
+2020-09-13 17:56:59,462 127.0.0.1 [13/Sep/2020:21:56:59 +0000] "GET / HTTP/1.1" 200 558 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
+2020-09-13 17:56:59,928 127.0.0.1 [13/Sep/2020:21:56:59 +0000] "GET /favicon.ico HTTP/1.1" 404 172 "http://0.0.0.0:8080/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
+2020-09-13 17:58:32,524 Received <Request GET / > non-post request
+2020-09-13 17:58:32,525 127.0.0.1 [13/Sep/2020:21:58:32 +0000] "GET / HTTP/1.1" 200 557 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
+2020-09-13 18:00:14,363 Received <Request GET / > non-post request
+2020-09-13 18:00:14,365 127.0.0.1 [13/Sep/2020:22:00:14 +0000] "GET / HTTP/1.1" 200 728 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
+2020-09-13 18:02:53,915 Received <Request GET / > non-post request
+2020-09-13 18:02:53,916 127.0.0.1 [13/Sep/2020:22:02:53 +0000] "GET / HTTP/1.1" 200 728 "-" "curl/7.54.0"
