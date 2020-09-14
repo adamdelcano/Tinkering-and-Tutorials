@@ -3,6 +3,7 @@
 # from datetime import datetime
 import pandas as pd
 import logging
+import scipy
 
 # get current directory for logging purposes
 #current_directory = str(os.getcwd())
@@ -44,8 +45,14 @@ async def extrapolate(data):
     # append to end of dataframe
     logging.info('Appending')
     df.loc[next_day] = None
-    df.index = df.index.astype(str)  # back to string frm datetime
+    df.index = pd.to_datetime(df.index)  # converts from string to datetime
     # actually interpolate
-    df = df.interpolate(limit_area='outside')
+    df = df.interpolate(
+        method='spline',
+        order=1,
+        limit_direction='forward',
+        limit_area='outside'
+    )
+    df.index = df.index.astype(str)  # back to string frm datetime
     logging.info('Extrapolation complete.')
     return df
