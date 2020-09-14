@@ -9,7 +9,7 @@ sec_process.py which handles json interpolation.
 
 
 
-In terms of dependencies: Currently it uses aiohttp, pandas, and json libraries. The last is used for very minor functionality and may be able to be removed once I have a better error-handling framework.
+In terms of dependencies: Currently it uses aiohttp, pandas, scipy, and json. The last is used for very minor functionality and may be able to be removed once I have a better error-handling framework.
 
 #### Performance
 Right now a major issue is that logging is blocking, which puts a damper on the gains from asyncio. Probably the best option is moving to the aiologging package.
