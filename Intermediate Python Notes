@@ -466,3 +466,54 @@ try:
 except ValueTooSmallError as e:
 	print(e)
 # prints 'value is too small 1'
+
+
+----------------------------------
+LOGGING
+Python has a solid builtin logging in stdlib
+
+import logging
+five different log levels, from lowest to highest: 
+logging.debug
+logging.info
+logging.warning
+logging.error
+logging.critical
+
+default warning or above is printed
+
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - (%levelname)s - %(message)s'),
+    datefmt = '%m/%d/%Y %H:%M:%s')
+# would show stuff of debug or higher
+
+Best practice is not to use root logger, but instead create your own, example:
+
+logger = logging.getLogger(__name__)  # creates a logger with the name of the module
+
+
+will let you import helper
+
+logger = logging.getLogger(__name__)
+logging.propagate = False # means it won't automatically override base logger
+
+
+# full creation example
+
+logger = logging.getLogger(__name__)
+#create handlers
+stream_h = logging.StreamHAndler()
+file_h = logging.FileHandler('file.log')
+# set level
+stream_h.set_level(logging.warning)
+file_h.set_level(logging.error)
+# set format
+formatter = logging.Formatter('%(name)s - (%levelname)s - %(message)s')
+stream_h.setFormatter(formatter)
+file_h.setFormatter(formatter)
+# set handlers
+logger.addHandler(stream_h)
+logger.addHandler(file_h)
+# customize logger level names
+logger.warning('this is a warning')
+logger.error('this is an error')
