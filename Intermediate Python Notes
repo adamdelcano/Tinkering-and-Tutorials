@@ -517,3 +517,119 @@ logger.addHandler(file_h)
 # customize logger level names
 logger.warning('this is a warning')
 logger.error('this is an error')
+--------------------------
+
+RECURSION
+A recursive function is a function defined in terms of itself via self-referential expressions.
+In practical terms, this means it calls itself in its own definition.
+A recursive function will have two parts: base case and recursive case.
+The base case is the point where things are simple enough to solve as a single operation.
+The recursive case is everything else, where we're breaking things down a step into smaller versions of the same problem.
+
+Example: 
+n! = n * (n-1) * (n-2) * etc until * 3 * 2 * 1
+
+so we can say that
+n! = n * (n-1)!
+n! = n * (n-1) * (n-2)!
+etc
+
+Thus:
+
+def factorial(num):
+    if num == 1:
+        return 1
+    else:
+        return (num * factorial(num - 1))
+
+It's important to remember that each has its own execution context/scope, so to maintain state during recursion you need to either:
+    -Thread the state through each recursive call so that the current stte is part of the current call's execution context.
+    -Keep the state in global scope.
+
+You can have multiple base cases:
+
+def fibonacci_recursive(n):
+    print("Calculating F", "(", n, ")", sep="", end=", ")
+
+    # Base case
+    if n == 0:
+        return 0
+    elif n == 1:
+        return 1
+
+    # Recursive case
+    else:
+        return fibonacci_recursive(n-1) + fibonacci_recursive(n-2)
+
+You could improve on this with a decorator(!!!)
+-
+from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fibonacci_recursive(n):
+    print("Calculating F", "(", n, ")", sep="", end=", ")
+
+    # Base case
+    if n == 0:
+        return 0
+    elif n == 1:
+        return 1
+
+    # Recursive case
+    else:
+        return fibonacci_recursive(n-1) + fibonacci_recursive(n-2)
+-
+lru_cache caches things, but note that it caches them as a dict, so the positional and kwargs must be hashable.
+
+Note that Python doesn't eliminate tail calls, so if you have more stack frames than the call stack depth, you can get a (say the word, bart) STACK OVERFLOW.
+
+This is relevant if you have a program that does deeeep recursion.
+-----------------------------------------
+DECORATORS
+
+Decorators use the @decorator syntactic sugar and basically let you apply a function to another function as a wrapper, in situations where you want to decorate a bunch of functions with the same functionality.
+
+This is useful in classes because there's things like @classmethod, @staticmethod, and @property.
+
+@classmethod  # denotes it affects the class as a whole, not just the instance
+@staticmethod  # same-ish
+@property  # to customize getters and setters for class attributes
+
+Fancy example:
+class Circle:
+    def __init__(self, radius):
+        self._radius = radius
+
+    @property
+    def radius(self):
+        """Get value of radius"""
+        return self._radius
+
+    @radius.setter
+    def radius(self, value):
+        """Set radius, raise error if negative"""
+        if value >= 0:
+            self._radius = value
+        else:
+            raise ValueError("Radius must be positive")
+
+    @property
+    def area(self):
+        """Calculate area inside circle"""
+        return self.pi() * self.radius**2
+
+    def cylinder_volume(self, height):
+        """Calculate volume of cylinder with circle as base"""
+        return self.area * height
+
+    @classmethod
+    def unit_circle(cls):
+        """Factory method creating a circle with radius 1"""
+        return cls(1)
+
+    @staticmethod
+    def pi():
+        """Value of π, could use math.pi instead though"""
+        return 3.1415926535
+
+-----------
