@@ -633,3 +633,5 @@ class Circle:
         return 3.1415926535
 
 -----------
+
+Generator expression note: because they don't calc until called, you save a TON of memory.
