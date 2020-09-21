@@ -517,6 +517,84 @@ logger.addHandler(file_h)
 # customize logger level names
 logger.warning('this is a warning')
 logger.error('this is an error')
+
+You can create a file in the folder as logging.conf and define the loggers, handlers and formatters in that.
+Example:
+-
+[handlers]
+keys=consoleHandler
+
+[formatters]
+keys=simpleFormatter
+
+[logger_root]
+level=DEBUG
+handlers=consoleHanlder
+
+[logger_simpleExample]
+level=DEBUG
+handlers=consoleHandler
+qualname=simpleExample
+propagate=0
+
+[handler_consoleHandler]
+class=StreamHandler
+level=DEBUG
+formatter=simpleFormatter
+args=(sys.stdout,)
+
+[formatter_simpleFormatter]
+format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
+-
+you could then 
+import logging
+import logging.config
+
+logging.config.fileConfig('logging.conf')
+logger = logging.getLogger('simpleExample')
+logger.debu('this is a debug message')
+
+which would output 2019-06-15 17:02:47, 666 - simpleExample - DEBUG - this is a debug message
+
+dictconfig is also an option
+logging.config.dictConfig() # lets you set it as a dict
+
+Capturing stack traces in log:
+
+import logging
+
+try:
+    a = [1,2,3]
+    val = a[4]
+except IndexError as e:
+    logging.error(e, exc_info=True) # exc_info=True captures whole stack trace
+OR
+import traceback
+
+try:
+    a = [1,2,3]
+    val = a[4]
+except IndexError as e:
+    logging.error(e"The error is %s", traceback.format_exc())
+does same thing
+
+Rotating filehandlers: Sometimes you want to make sure the files are small for logs so you can keep track of the most recent events.
+
+from logging.handlers import RotatingFileHandler
+ex: 
+handler = RotatingFileHandler('app.log', maxBytes=2000, backupCount = 5)
+logger.addHandler(handler)
+
+# this will create a new log every maxBytes, will overwrite once runs out of backupCounts
+
+from logging.handlers import TimedRotatingFileHandler
+
+# s, m, h, d, midnight, w0 as monday, w1 as tuesday, etc
+handler = TimedRotatingFileHandler('timed_test.log', when='m', interval=1 backupCount = 5)
+# will rotate at every interval whens
+
+python-json-logger is a thing on github which will let you log in json format
+
 --------------------------
 
 RECURSION
@@ -635,3 +713,53 @@ class Circle:
 -----------
 
 Generator expression note: because they don't calc until called, you save a TON of memory.
+
+-----------
+JSON
+
+json is short for
+J ava
+S cript
+O bject
+N otation
+It's a lightweight data format used for data exchange, heavily used in web apps. 
+-
+example.json
+{
+    "firstName: "Jane",
+    "lastName": "Doe",
+    "hobbies": ["running", "swimming", "singing"],
+    "age": 28
+    "hasChildren": true,
+    "children": [
+        {
+            "firstName": "Alex",
+            "age": 5
+        },
+        {
+            "firstName": "Bob",
+            "age": 7
+        }
+    ]
+
+}
+-
+Note that it looks very much like a dictionary. JSON supports primitive types (strings, numbers, boolean) as well as nested arrays and objects. Simple Python objects are translated to JSON according to the following conversion:
+
+PYTON    JSON
+dict    object
+list    array
+tuple    array
+str    string
+int    number
+long    number
+float    number
+True    true
+False    false
+None    null
+-
+
+import json
+                                 #sets indent        #tuple that lets you set separators, but don't
+exampleJSON = json.dumps(example, indent=4. separators=(': ', '= '))
+
