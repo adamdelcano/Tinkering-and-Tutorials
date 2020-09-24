@@ -142,4 +142,4 @@ cython_debug/
 
 # Adam added stuff
 *log.txt
-
+.DS_Store
