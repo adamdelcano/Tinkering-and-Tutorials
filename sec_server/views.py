@@ -5,9 +5,10 @@ import json
 import logging
 
 
-async def index(request):
-    logging.info('Received %s non-post request', request)
-    return web.Response(text="""<!DOCTYPE html>
+async def index(request: web.Request) -> web.Response:
+    """ Returns a static landing page to non-post requests. """
+    logging.info(f'Received {request} non-post request')
+    static_page = """<!DOCTYPE html>
 <html>
   <title>If You're Here, Something Has Gone Wrong</title>
 
@@ -20,12 +21,13 @@ async def index(request):
   <p> </p>
   <p>Also if you're here because I (Adam) asked you to help me test this,
    I guess it's actually the <b>opposite</b> of something going wrong?</p>
-</html>""", content_type='text/html')
+</html>"""
+    return web.Response(text=static_page, content_type='text/html')
 
 
-async def forecast(request):
+async def forecast(request: web.Request) -> web.json_response:
     """Takes json post, logs it, processes it, returns it."""
-    logging.info('Received %s', str(request))
+    logging.info(f'Received {str(request)}')
     try:
         data = await request.json()
         logging.info('Json received and decoded.')
@@ -36,5 +38,5 @@ async def forecast(request):
             Error: server was unable to parse request's json.
             """)
     new_data = await extrapolate(data)
-    logging.info('Sending %s', str(new_data))
+    logging.info(f'Sending {str(new_data)}')
     return web.json_response(new_data, dumps=pd.io.json.dumps)

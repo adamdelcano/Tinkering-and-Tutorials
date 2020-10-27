@@ -1,37 +1,17 @@
-# commeted out some imports here because they were used for logging
-# import os
-# from datetime import datetime
 import pandas as pd
 import logging
-import scipy
-
-# get current directory for logging purposes
-#current_directory = str(os.getcwd())
 
 
-# Deprecated homebrew async logging function because I should have known
-# a stdlib logger exists. I may reinstate at some point to try to work a
-# basic async logging functionality in
-#async def log(data, message=''):
-#    """Logs incoming data in data file, along with optional message"""
-#    log_file = open((current_directory + '_log.txt'), 'a')
-#    log_file.write(str(datetime.now()))
-#    log_file.write(message)
-#    log_file.write(str(data))
-#    log_file.write('\n')
-#    log_file.close()
-
-
-async def process(data):
+async def process(data: dict) -> pd.DataFrame:
     """Converting incoming data to dataframe. Currently in need of expansion
     to handle basic data sanitization and error checking, would not be in
     it's own function otherwise."""
-    logging.info('Converting %s to dataframe', data)
+    logging.info(f'Converting {data} to dataframe')
     df = pd.DataFrame(data)
     return df
 
 
-async def extrapolate(data):
+async def extrapolate(data: dict) -> str:
     """Takes the dataframe made by process and adds a new row with
     extrapolated data and returns it."""
     df = await process(data)
@@ -53,6 +33,6 @@ async def extrapolate(data):
         limit_direction='forward',
         limit_area='outside'
     )
-    df.index = df.index.astype(str)  # back to string frm datetime
+    df.index = df.index.astype(str)  # back to string from datetime
     logging.info('Extrapolation complete.')
     return df
