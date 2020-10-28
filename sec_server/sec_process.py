@@ -31,14 +31,9 @@ async def extrapolate(data: dict) -> pd.DataFrame:
     # create next day
     logging.info('Adding next day')
     df.index = pd.to_datetime(df.index)  # converts from string to datetime
-    next_day = df.index[-1] + pd.Timedelta(1, unit='day')
-    # advance until not weekend
-    while next_day.weekday() > 4:
-        next_day += pd.Timedelta(1, unit='day')
-    # append to end of dataframe
+    next_day = pd.date_range(start=df.index[-1], periods=2, freq='B')[-1]
     logging.info('Appending')
     df.loc[next_day] = None
-    df.index = pd.to_datetime(df.index)  # converts from string to datetime
     # actually interpolate
     df = df.interpolate(
         method='spline',
