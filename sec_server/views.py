@@ -1,32 +1,39 @@
-from aiohttp import web
-import pandas as pd
-from sec_process import extrapolate
 import json
 import logging
 
+from aiohttp import web
+
+import pandas as pd
+
+from sec_process import extrapolate
+
 
 async def index(request: web.Request) -> web.Response:
-    """ Returns a static landing page to non-post requests. """
-    logging.info(f'Received {request} non-post request')
-    static_page = """<!DOCTYPE html>
-<html>
-  <title>If You're Here, Something Has Gone Wrong</title>
+    """ Returns a static landing page to non-post requests.
 
-  <h1>Something has gone terribly wrong</h1>
-  <p>Okay, not <i>that</i> wrong.</p>
-  <p>This is just my shoddy static landing page.
-  Right now you want to add '/forecast' to the URL you used to navigate here
-  and then send a POST request containing a json serialized dataframe.</p>
-  <p>Or not, it's not that interesting.</p>
-  <p> </p>
-  <p>Also if you're here because I (Adam) asked you to help me test this,
-   I guess it's actually the <b>opposite</b> of something going wrong?</p>
-</html>"""
+    At this time, this is just an extremely basic function, which takes in any
+    web.Request object sent to it, logs it, and serves it, regardless of what
+    it is, the same static html.
+
+    Receives a non-POST request as sole parameter, returns web.Response."""
+    logging.info(f'Received {request} non-post request')
+    static_page = open('./test_page.html', 'r').read()
+
     return web.Response(text=static_page, content_type='text/html')
 
 
 async def forecast(request: web.Request) -> web.json_response:
-    """Takes json post, logs it, processes it, returns it."""
+    """
+    Takes json post, logs it, processes it, returns it.
+
+    forecast takes the web.Request, logs it, attempts to decode
+    the json data in it, runs that through extrapolate (in sec_process.py)
+    and after logging that, returns a web.json_response using pd.io.json.dumps
+    as the dumps format. Note that logging is blocking.
+
+    Takes web.Request object as sole parameter (should be POST w/ json) and
+    returns a processed web.json_response object.
+    """
     logging.info(f'Received {str(request)}')
     try:
         data = await request.json()

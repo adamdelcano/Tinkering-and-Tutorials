@@ -1,6 +1,8 @@
-from aiohttp import web
-from routes import setup_routes
 import logging
+
+from aiohttp import web
+
+from routes import setup_routes
 
 # set up logging function
 # NOTE: this is currently synchronous

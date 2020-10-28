@@ -1,19 +1,32 @@
-import pandas as pd
 import logging
+
+import pandas as pd
 
 
 async def process(data: dict) -> pd.DataFrame:
-    """Converting incoming data to dataframe. Currently in need of expansion
-    to handle basic data sanitization and error checking, would not be in
-    it's own function otherwise."""
+    """
+    Converts incoming data to dataframe.
+    Takes a dict as sole parameter, logs it, and then
+    converts it into a pandas dataframe, which it returns.
+    """
     logging.info(f'Converting {data} to dataframe')
     df = pd.DataFrame(data)
     return df
 
 
-async def extrapolate(data: dict) -> str:
-    """Takes the dataframe made by process and adds a new row with
-    extrapolated data and returns it."""
+async def extrapolate(data: dict) -> pd.DataFrame:
+    """
+    Extrapolates the data, adding new days with appropriate values.
+
+    Extrapolate uses the process function to create a pandas dataframe,
+    converts the index to datetime, advances the date until it wouldn't be a
+    weekend, appends that non-weekend date as the next blank row at the end
+    of the dataframe, then interpolates data to fill the new row. It then
+    converts the datetime index back to string and returns the dataframe.
+    It logs at each major step for redundance- note that logging is blocking.
+
+    Takes a dict as sole parameter, returns a pd.DataFrame object
+    """
     df = await process(data)
     # create next day
     logging.info('Adding next day')
