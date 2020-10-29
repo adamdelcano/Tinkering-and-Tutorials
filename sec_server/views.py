@@ -41,9 +41,9 @@ async def forecast(request: web.Request) -> web.json_response:
     # initial error handling, is insufficiently robust
     except json.decoder.JSONDecodeError:
         logging.warning('Non-json data received! Returned error to sender.')
-        return web.Response(text="""
-            Error: server was unable to parse request's json.
-            """)
+        raise web.HTTPBadRequest(reason='''
+            Message was not POST with recognizeable json.
+            ''')
     new_data = await extrapolate(data)
     logging.info(f'Sending {str(new_data)}')
     return web.json_response(new_data, dumps=pd.io.json.dumps)

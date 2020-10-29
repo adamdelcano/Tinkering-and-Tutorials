@@ -6,6 +6,10 @@ import pandas as pd
 async def process(data: dict) -> pd.DataFrame:
     """
     Converts incoming data to dataframe.
+
+    At this time this is an extremely simple function, separated out for the
+    purpose of expanding to handle errors.
+
     Takes a dict as sole parameter, logs it, and then
     converts it into a pandas dataframe, which it returns.
     """
@@ -27,20 +31,22 @@ async def extrapolate(data: dict) -> pd.DataFrame:
 
     Takes a dict as sole parameter, returns a pd.DataFrame object
     """
+    # convert dict to dataframe
     df = await process(data)
-    # create next day
-    logging.info('Adding next day')
-    df.index = pd.to_datetime(df.index)  # converts from string to datetime
+    # Convert index to datetime, generate next day, append it as blank row
+    logging.info('Calculating next day')
+    df.index = pd.to_datetime(df.index)
     next_day = pd.date_range(start=df.index[-1], periods=2, freq='B')[-1]
     logging.info('Appending')
     df.loc[next_day] = None
-    # actually interpolate
+    # Interpolate and put that data in
     df = df.interpolate(
         method='spline',
         order=1,
         limit_direction='forward',
         limit_area='outside'
     )
-    df.index = df.index.astype(str)  # back to string from datetime
+    # Return index to string, log it, return the value
+    df.index = df.index.astype(str)
     logging.info('Extrapolation complete.')
     return df
