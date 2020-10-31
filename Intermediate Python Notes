@@ -723,6 +723,8 @@ S cript
 O bject
 N otation
 It's a lightweight data format used for data exchange, heavily used in web apps. 
+Like, EXTREMELY used. It's basically the closest to agnostic data formatting we see.
+
 -
 example.json
 {
@@ -758,8 +760,63 @@ True    true
 False    false
 None    null
 -
-
+SERIALIZATION / ENCODING
 import json
-                                 #sets indent        #tuple that lets you set separators, but don't
-exampleJSON = json.dumps(example, indent=4. separators=(': ', '= '))
 
+person = {"name": "John", "age": 30, "city": "New York", "hasChildren": False, "titles": ["engineer, programmer"]}
+                                   #tuple that lets you set separators, but don't use it
+personJSON = json.dumps(person,  # argument
+    indent=4, # sets indent, 4 is good
+     separators=(': ', '= ') # tuple that lets you set separators, but don't, that defeats point of json
+     sort_keys=True  # lets you sort by keys
+     )
+# to dump into file
+with open('person.json', 'w') as file:
+    json.dump(person, file, indent=4)
+
+# to convert BACK, aka DESERIALIZATION / decoding
+
+person = json.loads(personJSON) # produces the original person
+# from file
+with open('person.json', 'r') as file:
+person = json.load(person.json)
+
+# if custom class
+
+class User:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+user = User('Max', 27)
+
+userJSON = json.dumps(user)  # will not work, raises TypeError: Object of type User is not JSON serializable
+
+# quick custom encoder func
+def encode_user(object):
+    if isinstance(object, User):
+        return {'name': object.name, 'age': object.age, object.__class__.name__: True}
+    else:
+        raise TypeError('Object of type User is not JSON serializable')
+
+userJSON = json.dumps(user, default=encode_user) # use the custom function here
+
+# or custom class of encoder
+from json import JSONEncoder
+class UserEnconder(JSONEncoder):
+    def default(self, o):
+        if isinstance(o, User):
+            return {'name': object.name, 'age': object.age, object.__class__.name__: True}
+        return JSONEncoder.default(self, o)
+
+userJSON = json.dumps(user, cls=UserEncoder)
+# using the class directly
+userJSON = UserEncoder().encod(user)
+
+# YOu also need to custom decode classes 
+
+def decode_user(o):
+    if User.__name__ in dct:
+        return User(name=dct['name'], age=dct['age'])
+    return dct
+
+user = json.loads(userJSON, object_hook=decode_user)

@@ -1,0 +1,1062 @@
+PYTHON NOTES
+
+
+Basic stuff:
+print() displays value passed to it
+input() lets user type in value
+int(), float(), str() convert their argument into that type
+eval() turns the argument into an expression
+
+Boolean Values: True and False
+Comparison Operators:
+== equal to
+!= not equal
+< less than
+> greater than
+<= Less than or equal
+>= greater than or equal
+
+
+mnemonic:
+== 2 characters, equal two, equal to
+!= also 2 characters
+
+Str will never equal int/float
+Float and Int can be equal!
+
+Boolean Operators
+AND 
+OR
+NOT
+(see truth tables for each if you really need them?)
+
+Condition: expression in an if statement.
+
+pythontutor.com has visualizer
+
+Blocks care about indentation- they begin when indentation increases, end when it returns.
+
+Blocks sometimes called clauses, they always start with colon.
+
+IF/ELSE
+if statement: does something if (heh) the thing is true
+that is, it conditionally executes code depending on whether or not the statement's condition is True or False
+else statement: follows an if statement, if the thing is false execute else
+Only one will ever be executed
+It's block executes if all previous have been False.
+
+ELIF
+Lets you provide multiple conditions.
+As many as you need.
+Order matters: only the first True elif will happen.
+That is, an elif will execute if it is True and everything before it is False. 
+Else can be added at end, will happen if all IF and ELIF are False
+
+Conditions can use "truthey" and "falsey" values
+Blank string is falsey
+All others are truthy
+
+0 is falsey
+All other integers are truthy.
+0.0 is falsey
+all other floats are truthy
+
+IN GENERAL it's better to be explicit
+
+bool() returns the boolean value of whatever you give it
+
+WHILE LOOPS
+A while loop keeps executing until the condition is False. 
+Each loop is an iteration.
+A while block rechecks condition after each iteration vs an if block which just moves to the rest of the program.
+When the execution reaches the end of a while statement block, it jumps back to the start to re-check the condition.
+
+Press control-c to interrupt an infinite loop.
+
+
+it's useful for input validation- a good way to make sure the user inputs valid input
+
+break Statement: immediately jumps out of the loop and onto the rest of the code without re-checking the condition
+
+continue Statement: jumps back to the START of the loop and immediately re-checks the condition.
+
+for LOOPS:
+
+a for loop iterates a specific number of times.
+for loops generally more concise than while loops if you want it to loop a specific number of times
+
+Range:
+ranges go UP TO but not INCLUDING the top of the range
+range(y) returns a range object range(0,x)
+range(x,y) goes from x and ends UP TO but not INCLUDING y
+range(x,y,z) goes from x to y in increments of z
+
+EDIT 4/13: FUCK RANGE IN LOOPS, ENUMERATE FOR LIFE:
+enumerate(thing) generates an iterator the length of thing almost like range(len(thing)), enumerate(thing,1) starts at 1 instead of zero
+
+break and continue will work in for loops.
+
+BUILT IN PYTHON FUNCTIONS
+
+Standard Library
+A bunch of premade functions
+need to be imported
+use import to import them, you can import multiples by separating with commas
+from module import function lets you import just one thing by itself which means you don't have to type module.function() every time
+from module import * imports everything but is less readable because you can't know looking back which module it's from
+
+sys.exit() ends program
+
+Third Party modules
+pip installs third party modules
+
+You can import modules to get access to new functions. pyperclip has copy() and paste() which are useful for reading and writing text to clipboard.
+
+WRITING YOUR OWN FUNCTIONS
+
+Functions
+Way to reuse the same code over and over.
+Like a mini-program inside your program.
+The main point is to get rid of duplicate code.
+The def statement defines a function.
+The input to functions are arguments.
+Argument = the value passed in the function call.
+Parameter = the variable inside the function
+The output of a function is the return value.
+Function calls can be part of expressions because they evaluate to a value returned by the function call. return lets you define what they retun.
+The return value is specified using the return statement.
+
+None
+What does the print function return?
+print returns None
+None is the only value of the None-type data type. 
+It represents a lack of a value, which comes in handy.
+Every function call has a return value. None is the default if you don't have a return specified.
+
+
+Keyword args
+Keyword arguments to functions are usually for optional arguments. 
+The print() function has keyword arguments end and sep.
+
+GLOBAL AND LOCAL SCOPES
+
+Parameters defined inside a function are in that function's local scope.
+Parameters defined outside are in the global scope.
+
+A scope is a container of variables.
+Global scope created when program starts, destroyed when it finishes.
+Local scope created each time function called, when function returns local variables are forgotten.
+Code in a global scope can't see local scope variables and can't use them.
+Code in a function's local scope CAN see global scope variables.
+Code in one function's local scope can't see into another function's local scope and so cannot use variables from it.
+
+Again, when a function returns, all the local stuff inside it is gone.
+Local variables are completely separate, this is good so you don't have to use unique variable names inside EVERY functions.
+
+Assignment statement inside a local scope means it's a local variable, it will use the local version.
+No assignment statement in a local scope means it's a global variable, it will look at the global scope.
+The global statement lets you tell a function to use the global even if it has another name
+
+Scope separation means you know WHERE something is going wrong when stuff goes wild.
+Let you treat functions as "black boxes"
+
+A scope can be thought of as an area of the source code, and as a container of variables.
+The global scope is outside of all functions. Variables assigned here are global variables.
+Each function's code is in its own local scope. Variables assigned here are local variables.
+Code in the global scope cannot use any local variables.
+Code in a function's local scope cannot use variables in any other function's local scope.
+If there's an assignment statement for a variable in a function, that is a local variable.
+
+TRY and EXCEPT statements.
+
+When code in a try clause throws an error, it goes to the except clause. You can specify which error goes to which except. Useful for input validation- making sure the program doesn't crash because of receiving invalid input.
+
+A divide-by-zero error happens when Python divides a number by zero.
+Errors cause the program to crash.
+An error that happens inside a try block will cause code in the except block to execute. That code can handle the error or display a message to the user so that the program can keep going.
+
+Writing a complete program: Guess the number
+---
+
+The List Data Type
+List is a value that contains values. Multiple values in an ordered sequences. Values inside a list are called items.
+
+Items are comma-delimited.
+List has index, 0 is first thing in list. 
+Negative integers count from the end, -1 is last. 
+Slice is a bunch of things from the list.
+Index evaluates to single item from the list.
+Slice evaluates to a new list of items from the list.
+Default of first part of slice is beginning, second is end.
+del Statements let you delete part of a list. An Unassignment statement if you will.
+Changing a List's items: you can just assign stuff to them.
+
+You can do most string stuff to a list. It can be useful to think of a string as just a list of charactrs.
+
+There's a list() function that returns a list form of the value you pass it.
+
+in and not in
+operators that evaluate to True/False on whether thing is in list
+
+List is a value that contains multiple values.
+The values in a list are also called items.
+You can access items in a list with it's integer index.
+The indexes start at 0, not 1.
+You can also use negative indexes. -1 refers to the last item, -2 refers to the second to last item, and so on. 
+You can get multiple items from the list using a slice.
+The slice has two indexes. The new list's items start at the first index and go up to, but doesn't include, the second index.
+The len() function, concatenation, and replication work the same way with lists that they do with strings.
+You can convert a value into a list by passing it to the list() function.
+
+Listlike objects called sequences
+
+range(len(list())) is useful for indexing all of a list 
+
+Multiple assignment is a thing:
+size, color, disposition = cat
+assigns size=cat[0], color = cat[1], disposition = cat[2]
+size, color, disposition = 'skinny', 'black', 'quiet'
+assigns size = 'skinny' etc
+
+Above useful for swapping variables
+a = 'AAA'
+b = 'BBB'
+a, b = b, a
+
+Augmented assignment: +=
+spam += 1 is equivalent to spam = spam +1
+-= , *=, /= , %= all also exist
+
+-for loops technically iterate over the values in a list
+-the range() function returns a list-like value, which can be passed to the list() function if you need an actual list
+-variables can swap their values using multiple assignment
+-agumented assignment operators like += are used as shortcuts
+
+METHODS AND LIST METHODS
+Method is the same thing as a function except called on a certain value. example: spam.index()
+
+Can't call methods by themself. They're like an ability things have.
+
+List data type methods:
+list.index(thing) tells you THE FIRST index position it finds thing at. If there are duplicates it will just give you the first.
+
+list.append(thing) adds thing to the end, list.insert(index, thing) adds it at index
+
+
+list.sort() uses ascii order- all caps before all lowercase
+list.sort(key=str.lower) does true alphabetical order
+list.sort(reverse=True) does it in reverse
+list.sort(key=str.lower, reverse=True) would be both
+
+recap: 
+Methods are functions that are "called on" values
+The index() list method returns the index of an item in the list
+The append() list method adds a value to the end of a list
+The insert() list method adds a value anywhere inside a list
+The remove() list method removes an item, specified by the value, from a list
+The sort() list method sorts the items in a list.
+The sort() method's reverse=True keyword argument can sort in reverse order.
+Sorting happens in "ASCII-betical" order, to sort normally, pass key=str.lower
+These list methos operate on the list "in place", rather than returning a new list value.
+----
+Similarities between strings and lists
+
+Strings and lists have many similarities- strings almost work like lists of characters. HOWEVER, lists are mutable and changeable, but a string is immutable, unchangeable. 
+
+If you want to modify a string, the best way is to create a new string from a slice of the original.
+The difference between mutable/immutable values in python  comes up with 'references' explained next.
+
+References: when you assign a list to a variable, you don't have set the variable to whatever the list was then, it checks anew every time it gets referenced. Also, changing the variable changes the list.
+
+spam = [0,1,2,3,4,5]
+means spam refers to that list, it does not mean that spam IS that list
+cheese = spam
+means cheese refers to the SAME list
+
+modifying the list modifies the list, which both point to.
+
+All mutable values aren't stored inside variables, variables reference mutable values in memory.
+
+Immutable values don't have that because they can't be modified 'in place', they can only be replaced by new values.
+
+Passing lists in function calls:
+This can do weird stuff because functions can modify stuff in global scope.
+
+copy.deepcopy() does make a new version of the same list
+
+line continuation:
+python won't count line breaks or whitespace in line.
+\ will also manually do this
+
+Recap: strings can do a lot of the same things as lists, but strings are immutable. 
+Immutable values like strings and tuples cannot be modified "in place"
+Mutable values like lists can be modified in place.
+Variables don't contain lists, they contain references to lists.
+When passing a list argument to a function, you're actually passing a list reference.
+Changes made to a list in a function will affect the list outside the function.
+The \ line continuation character can be used to stretch python instructions across multiple lines.
+References are explained very well in Ned Batchelder's talk
+"Facts and myths about Python names and values": 
+25 min video at https://youtu.be/_AEJHKGk9ns
+-----
+DICTIONARIES
+unordered thing of data in key:value pairs.
+mutable like list, so variables contain reference
+
+methods:
+keys(), values(), items()
+they return list-like objects of the keys/values/items
+
+get() looks for something in the dictionary, with a default argument returned if it doesn't find it
+and 
+setdefault() looks for a key in the dictionary, with a default value to add that key to.
+
+Dictionaries contain key-value pairs. Keys are like a list's indexes.
+Dictionaries are mutable. Variables hold references to dictionary values, not the dictionary value itself. 
+Dictionaries are unordered. There is no "first" key-value pair in a dictionary.
+The keys() values() and items() methods will return list-like values of a dictionary's keys, values, and both keys and values, respectively.
+The get() method can return a default value if a key doesn't exist.
+The setdefault() method can set a value if a key doesn't exist.
+The pprint module's pprint() 'pretty print' function can display a dictionary's value cleanly. The pformat() function returns a string value of this output.
+
+tuples are like lists but in regular parentheses vs square brackets, and IMMUTABLE
+
+Advanced String Syntax:
+Strings can begin and end with double quotes as well as single quotes.
+Escape characters let you put quotes and other characters that are hard to type inside strings.
+Raw strings will literally print any backslashes in the string and ignore escape characters.
+Multiline strings begin and end with three quotes and can span multiple lines.
+Indexes, slices, and the in and not in operators all work with strings.
+
+STRING METHODS
+String methods return a new string value since they're immutable.
+
+upper()
+lower()
+
+
+isupper()
+islower()
+isalnum()
+isdecimal()
+isspace()
+istitle() <whoa
+
+upper() and lower() return an uppercase or lowercase string.
+isupper(), islower(), isalpha(), isalnum(), isdecimal(), isspace(), istitle() return True or False if the string is that respective kind of string.
+startswith() and endswith() also return bools.
+''.join(['cat', 'dog']) returns a string that combines the strings in a list
+'Hello world'.split() returns a list of strings split from the string it's called on.
+rjust(), ljust(), center() return a string padded with spaces
+strip(), rstrip(), lstrip() return a string with whitespace stripped off the sides.
+replace() will replace all occurrences of the first string argument with the second string argument.
+pyperclip has copy() and paste() functions for using the clipboard.
+
+STRING FORMATTING
+%s but I should look into other stuff.
+
+REGULAR EXPRESSIONS
+
+They're awesome.
+Regular expressions are mini-language for specifying text patterns. Writing code to do pattern matching without regular expressions is a huge pain.
+Regex strings often use backslashes (like \d), so they are often raw strings: r'\d'
+Import the re module first
+Call the re.compile() function to create a regex object.
+Call the regex object's search() method to create a match object.
+Call the match object's group() method to get the matched string.
+\d is the regex for a numeric digit character.
+
+REGEX GROUPS AND THE PIPE CHARACTER
+Groups are created in regex strings with parentheses.
+The first set of parentheses is group 1, the second is 2, and so on.
+Calling group() or group(0) returns the full matching string, group(1) returns group 1's matching string, and so on.
+Use \( and \) to match literal parentheses in the regex string.
+The | pipe can match one of many possible groups.
+
+
+REPETITION IN REGEX Patterns and Greedy/Nongreedy Matching
+? is 0-1
+* is 0 or more 
++ is 1 or more
+{x} is exactly x
+
+The ? says the group matches zero or one times.
+The * says the group matches zero or more times.
+The + says the group matches one or more times.
+the curly braces {} can match a specific number of times.
+The curly braces with two numbers matches a minimum and maximum number of times.
+Leaving out the first or second number in the curly braces says there is no minimum or maximum.
+Greedy matching matches the longest string possible, nongreedy matching matches the shortest string possible.
+Default is greedy in Python.
+Putting a question mark after the curly braces makes it do nongreedy matching.
+
+
+
+Regex Character Classes and the findall() Method
+search() returns a match object
+findall() returns strings/tuples
+If the regex string you're using to findall has 0-1 groups it returns a list of strings, if 2+ groups it's a list of tuples.
+Each tuple will be each found group in order of the parentheses opened.
+
+Shorthand
+\d 0-9
+\D NOT a digit
+\w word (letter, digit, underscore) stuff
+\W NOT letter, digit, underscore
+\s space, tab, newline
+\S NOT space, tab, newline
+
+
+You can make your own! brackets let you do this r'[aeiou]' is equal to r'(a|e|i|o|u)' and r'[aeiou]{2}' would be looking for two lower case vowels in a row.
+
+A ^ means do the opposite: r'[^aeiouAERIOU'] hits not vowels
+
+The regex method findall() is passed astring, and returns all matches in it, notjust the first match. 
+If the regex has 0 or 1 groups, findall() returns a list of string.s
+If the regex has 2 or more groups, findall() returns a list of tuples of strings.
+\d is a shorthand character class that matches digits, \w  matches word characters, \s matches whitespace characters.
+The uppercase shorthand character classes \W \D \S match characters that are NOT word, digits, or spaces.
+You can make your own character classes with square brackets [aeiou]
+A ^ caret makes it a negative character class, matching anything not in the brackets [^aeiou]
+
+Regex Dot-Star and the Caret/Dollar Characters
+
+^ must begin with whatever is after it
+$ must end with whatever is before it
+. any character but a newline
+.* so any character, zero or more
+.* is greedy
+.*? is nongreedy
+as a second argument re.DOTALL means . hits EVERYTHING
+as a second argument, re.I or re.IGNORECASE makes it case insensitive
+
+^means the string must start with the pattern, $ means the string must end with the pattern. Both meansthe entire string must match the pattern.
+The .dot is a wildcard;it matches anything except newlines.
+Pass re.DOTALL as the second argument to re.compile() to make the .dot matchnewlines as well.
+Pass re.I as the second argument to re.compile() to make the matching case-insensitive.
+
+Regex sub() Method and Verbose Mode
+sub() is find/replace, first argument is what you're replacing with, replace, second is the text you want to look at. You can use \ to replace with some of the original matching string.
+
+Verbose mode with re.VERBOSE
+re.Verbose lets you ignore whitespace and add # to make comments. useful for complex stuff!
+
+if you want to pass multiple arguments,re.compile(r'string', re.IGNORECASE | re.DOTALL | re.VERBOSE)
+it's esoteric and not really used anywhere else in new languages
+
+The sub() regex method will substitute matches with some other text.
+Using \1, \2 and so on will substitute group 1, 2, etc in the regex pattern when using sub
+Passing re.VERBOSE lets you add whitespace and comments to the regex string passed to re.compile()
+If you want to pass multiple arguments (re.DOTALL, re.IGNORECASE, re.VERBOSE), combine them with the | bitwise operator
+
+Filenames and Absolute/Relative File Paths
+
+/ is the root folder (the equivalent of C:\) on mac
+\ is windows separator, / is mac
+
+don't forget to escape\ any backslashes on windows
+or use r'' 
+
+os is a useful module that just tells you stuff about this
+
+os.path joins stuff according to the current operating system
+
+os.getcwd() tells you where you are right now
+
+absolute filepath starts with root directory
+relative filepath don't, they're relative to where the current working directory is
+
+. folder: stands for this folder
+.. folder: stands for parent folder
+
+if you're in C:\Bacon, .\spam.png would take you to C:\Bacon\spam.png
+
+if you're in C:\Bacon, ..\eggs\spam.txt would take you to C:\eggs\spam.txt
+
+relative filepath can ignore the .\ if it's a child of current working directory
+
+Files havea name and path
+The root folder is the lowest folder. It's C:\ on windows and / on Linux and Mac
+In a file path, thefolders and filename are separated by backslashes on Windows and forward slashes on Linux and Mac.
+Use the os.path.join() function to combine folders with the correct slash
+The current working directory is the folder that any relative paths are relative to.
+os.getcwd() will return the current working directory.
+os.chdir() will change the current working directory
+Absolute paths begin with the root folder, relative paths do not.
+The . folder represents "this folder", the .. folder represents "the parent folder"
+os.path.abspath() returns an absolute form of the path passed to it
+os.path.isabs() returns True if the path passed to it is absolute
+os.path.relpath() returns the relative path between two paths passed to it
+os.makedirs() can make folders
+os.path.getsize() returns a file's size
+os.listdir() returns a string of filenames
+os.path.exists() returns True if the filename passed to it exists.
+os.path.isfile() and os.path.isdir() return True if they were passed a filename or file path.
+
+Reading and Writing Plaintext Files
+
+plaintext: just has text characters
+binary: basically everything else. beyond the scope of automate the boring stuff  but yeah
+
+variables are KINDA like a dictionary key
+
+open() will return a file object which has reading and writing related methods
+pass 'r' or nothing to open() the file in read mode, 'w' for write mode, 'a' for append mode.
+opening a nonexistant filename in write or append mode will create that file.
+call read() or write() to read the contents of a file or write a string to a file
+call readlines() to return a list of strings of the files' content
+call close() when you are done with the file.
+the shelve module can store python values in a binary file.
+shelve.open() returns a dictionary-like shelf value
+
+COPYING AND MOVING FILES AND FOLDERS
+shutil is the module for this
+
+shutil.copy() copies files
+shutil.copytree() copies folders
+shutil.move() moves things
+all of these take source then destination, you can rename files as part of this by putting filename in destination
+
+DELETING FILES
+os.unlink() deletes file
+os.rmdir() deletes folder, BUT ONLY IF COMPLETELY EMPTY
+shutil.rmtree() deletes folders with contents
+DO NOT FUCK AROUND
+THEY DO NOT MOVE TO RECYCLING BIN OR TRASH
+
+Do a dry run for the love of god before you do anything like that.
+
+There's instead a send2trash module!
+
+os.unlink() will delete a file
+os.rmdir() will delete a folder (but the folder must be empty)
+shutil.rmtree() will delete a folder and all its contents
+deleting can be dangerous, so do a dry run first
+send2trash.send2trash() will send a file or folder to the recycling bin
+
+WALKING THE DIRECTORY TREE
+os.walk() function does this. 
+It returns 3 things: folder, subfolders, files
+
+
+DEBUGGING
+raise lets you make custom Exceptions
+
+traceback module exists
+
+assert will raise Exception if the condition following assert evaluates to False
+Assertions are sanity checks, we shouldn't expect them.
+You can raise your own exceptions: raise Exception('This is the error message')
+You can also use assertions: assert condition, 'Error message.'
+Assertions are for detecting programmer errors that are not meant to be recovered from. User errors should raise exceptions.
+
+LOGGING
+
+import logging
+logging.basicConfig(filename = 'myProgramLog.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.disable(logging.CRITICAL) <could hide lower levels instead of everything if you prefer
+
+Log Levels:
+debug (lowest)
+info
+warning
+error
+critical (highest)
+
+disabling critical disables everything below it
+
+The logging module lets you display logging messages.
+Log messages create a breadcrumb trail of what your program is doing.
+After calling basicConfig() to set up logging, call logging.debug() to create a log message.
+When done, you can disable the log messages with logging.disable(logging.CRITICAL)
+Don't use print() for log messages; it's hard to remove them when you're done debugging.
+
+The five log levels are: CRITICAL (highest), ERROR, WARNING, INFO, DEBUG (lowest).
+You can also log to a file instead of the screen with the filename keyword argument to the basicConfig() function.
+
+USING THE DEBUGGER (in IDLE)
+
+dunder is shorthand for double underscore ex: __doc__ 
+GO: just runs everything
+OVER: next line, will jump over function if it starts
+STEP: next line, will jump into a function as it starts
+OUT: jumps out of function it's in into the next line after the function finishes
+QUIT: this kills the program 
+
+out is useful if you step into a built-in function
+
+breakpoints in a program let you set stops at the debugger- if you right click on a line in a file in idle you can set one, GO will then take you until you hit a breakpoint
+
+
+The debugger is a tool that lets you execute Python code one line at a time and shows you the values in variables.
+Open the Debug Control window with Debug > Debugger before running the program.
+The Over button will step over the current line of code and pause on the next one.
+The Step button will step into a function call.
+The Out button will step out of the current function you are in.
+The Go button will continue the program until the next breakpoint or the end of the program.
+The Quit button will immediately terminate the program.
+Breakpoints can be set by right-clicking the file editor window and selecting 'Set Breakpoint'
+
+THE WEBBROWSER MODULE
+Python has webbrowser module
+Mostly it's good for webbrowser.open('URL')
+
+Downloading from the Web with the Requests
+Module
+
+requests lets you download files, for instance using requests.get('file url')
+request object has raise_for_status() which lets you check status, can be worth it for try/except
+
+you can open these objects in open() if you use 'wb' as an additional argument 
+
+http://bit.ly/unipain <python and unicode
+
+requests.readthedocs.org <more info on the requests module
+
+requests work if the url works directly, if you need to login it might not work well
+
+The requests module is a third-party module for downloading web pages and files.
+requests.get() returns a Response object.
+The raise_for_status() Response method will raise an exception if the download fails.
+You can save a downloaded file to your hard drive with calls to the iter_content() method.
+
+Parsing HTML with the Beautiful Soup Module
+
+Webpages are plaintext files formatted as HTML
+HTML can be parsed with the BeautifulSoup module
+BeautifulSoup is imported with the name bs4.
+Pass the string with the HTML to the bs4.BeautifulSoup() function to get a Soup object
+The Soup object has a select() method that can be passed a string of the CSS selector for an HTML tag.
+You can get a CSS selector string from the browser's developer tools by right-clicking the element and selecting Copy CSS Path
+The select() method will return a list of matching Element objects.
+
+Controlling the Browser with the Selenium Module
+
+Selenium lets you directly control the browser. It's madness.
+
+To import selenium, you need to run: from selenium import webdriver
+to open the browser, run: browser = webdriver.Firefox(executable_path = '/Library/Frameworks/Python.framework/Versions/3.7/bin/geckodriver') 
+to send the browser to a URL, run browser.get('URL')
+the browser.find_elements_by_css_selector() method will return a list of WebElement objects
+WebElement objects have a text variable that contains the element's HTML in a string.
+The click() method will click on an element in the browser
+the send_keys() method will type into a specific element in the browser
+the submit() method will simulate clicking on the submit button for a form
+the browser can also be controlled with these methods: back(), forward(), refresh(), quit()
+consider checking out the automate-the-boring-stuff book on this
+
+It is MADNESS
+
+
+ Reading Excel Spreadsheets
+ The OpenPyXL third-party odule handles excel spreadshets (.xlsx files)
+openpyxl.load_workbook(filename) returns a Workbook object
+workbook['sheetname'] and workbook.sheetnames help get Worksheet objects
+The square brackets in sheet['A1'] get Cell objects
+Cell objects have a value member variable with the content of that cell.
+The cell() method also returns a Cell object from a sheet.
+
+
+Editing Excel Spreadsheets
+You can view and modify a sheet's name with its title member variable.
+Changing a cell's value is done using the square brackets, just like changing a value in a list or a dictionary.
+Changes you make to the workbook object can be saved with the save() method.
+
+Reading and Editing PDFs
+PyPDF2 is the pdf module, it might not be amazing- pdfs are hard af.
+
+The PyPDF2 module can read/write PDFS
+Opening a pdf is done by calling open() and passing the file object to PdfFileReader()
+A Page object can be optained from the pdf object with the getPage() method
+the text from a Page object is obtained with the extractText() method, which can/will be imperfect
+new pdfs can be made from PdfFileWriter()
+New pages can be appended to a writer object with the addPage() method
+Call the write() method to save its changes.
+
+Reading and Editing Word Documents
+
+python-docx is the module, python-docx.readthedocs.org is the docs
+
+import docx 
+
+Document object is the main object
+Contains Paragraph objects
+each of which contains Run
+
+You can only add stuff at the end as of the tutorial.
+If you want to add stuff you basically have to make a new document, and copy the old document while adding the changes to interleave as you copy it over
+
+Python-Docx can read and write .docx Word files
+Open a word file with docx.Document()
+access one of the Paragraph objects from the paragraphs member variable, which is a list of Paragraph objects
+Paragraph objects have a text member variable containing the text as a string value
+Paragraphs are composed of "runs." The runs member variable of a Paragraph object contains a list of Run objects.
+Run objects also have a text member variable
+Run objects have a bold, italc, and underline member variables which can be set to True or False.
+Paragraph and Run objects have a style member variable that can be set to one of Word's built-in styles.
+Word files can be created by calling add_paragraph() and add_run() to append text content.
+
+SENDING EMAILS
+
+Emails are a good way to automate notifications. 
+SMTP: Simple Mail Transfer Protocol
+
+module is smptplib
+look up individual smtp server and port
+gmail is smpt.gmail.com
+200 codes = good
+starttls
+login
+
+SMTP port = 587 
+values of the "bytes" data type look like strings but begin with a "b" when typed as code
+
+If you want to automate something re: gmail, you have to turn "access to less secure apps" on, which WILL make gmail freak out.
+you can also make app-specific passwords in gmail which is sick
+
+sendmail sends email
+there are email limits per day
+
+recap:
+import smtplib
+email = smtlib.SMTP('smtp server', port)
+emai.ehlo()
+email.starttls()
+email.login('username', 'password')
+email.sendmail()
+
+CHECKING YOUR EMAIL INBOX
+IMAP = Internet Message Access Protocol
+
+IMAP is a pretty complicated protocol, as old as internet, not designed to be userfriendly
+
+impapblib exists but you should use imapclient and pyzmail instead (use pyzmail36 on python 3.6 or later)
+
+IMAP protocol has it's own syntax.
+
+This is fairly complicated - prob worth reviewing the chapter.
+
+You'll need imap server domain name
+imap.gmail.com
+
+conn = impapclient.IMAPClient('imap.gmail.com', ssl=True)
+conn.login('username', 'password')
+conn.select_folder('INBOX', readonly = True)
+ ( you can list folders using conn.list_folders()
+conn.search(and it'll flag stuff)
+IMAP search keys are a thing: 'ALL', 'BEFORE date', 'ON date', 'SINCE date' date is 05-Jul-2015 
+
+'SUBJECT string'
+'BODY string'
+
+
+Just a lot of funky keys, reference it elsewhere
+
+conn.fetch([the email])
+
+
+conn.delete_messages('UIDs') deletes the email.
+
+pyzmail lets you process messages better
+This is again not super easy?
+
+imapclient.readthedocs.org
+www.magiksys.net/pyzmail
+automatetheboringstuff.com/chaper16
+^^^references^^^
+
+GUI AUTOMATION
+
+Controlling the mouse from Python
+
+
+GUI automation is just directly controlling the mouse/keyboard. Ideally you use modules that directly interact but the dark arts are a thing.
+
+Screen is cartesian coordinate system, x is L/R, y is Up/Down, 0,0 is top left, increasing goes left to right and up to down
+
+pyautogui.position() tells you mouse location
+pyautogui.moveto(x,y,duration) moves mouse over duration
+pyautogui.moveRel(x,y,duration) moves it relative to current position
+pyautogui.click()   .doubleClick() .rightClick() .tripleClick() do clicks and variation
+pyautogui.dragTo() and dragRel() work like move but holding click down
+
+GUI automation can be risky- the failsafe is get the mouse to the top left corner (0,0) and it will stop. 
+
+from command line
+pyautogui.displayMousePosition() shows X, Y, RGB value of where the mouse is. useful for quickening hunting the specific screen coordinates
+doesn't work in IDLE because it just constantly spams stuff
+
+recap:
+Controlling the mouse and keyboard is called GUI automation
+The PyAutoGUI third-party module has many functions to control the mouse and keyboard
+pyautogui.size() returns the screen resolution, pyautogui.position() returns the mouse and keyboard
+pyautogui.moveTo() moves the mouse to x,y coordinate
+The mouse move is instand, unless you pass an int for the duration argument
+pyautogui.moveRel() moves the mouse relative to its current position
+pyautogui's click(), doubleCLick(), tripleClick(), rightClick(), and middleClick() click the mouse buttons
+dragTo() and dragRel() will move the mouse while holding down a mouse button
+If your program gets out of control, quickly move the mouse cursor to the top left
+there's more documentation at pyautogui.readthedocs.org
+
+CONTROLLING THE KEYBOARD FROM PYTHON
+
+pyautogui.typewrite('string', interval) lets you type, if you want specific non string stuff you can do a ['list', 'of', 'keys', 'you', 'want', 'pressed']
+
+pyautogui.pres('key') lets you press single keys
+
+recap:
+PyAutoGUI's virtual keypresses will go to the wndow that currently has focus.
+typewrite() can be passed a string of characters to type. It also has an interval keyword argument.
+Passing a list of strings to typewrite() lets you use hard-to-type keyboard keys, like 'shift' of 'f1'.
+These keyboard key strings are in the pyautogui.KEYBOARD_KEYS list
+pyautogui.press() will press a single key
+pyautogui.hotkey() can be used for keyboard shortcuts, like CTRL+O
+
+SCREENSHOTS AND IMAGE RECOGNITION
+on linux, you need scrot to screenshot
+pyautogui has pillow for image recognition
+automatetheboringstuff chapter 17 has more details on this- covers a ton of important stuff
+
+pyautogui.readthedocs.org
+
+image recognition is slow and needs to be pixelperfect
+
+https://github.com/asweigart/sushigoroundbot
+
+Recap:
+A screenshot is an image of the screen's content.
+the pyautogui.screenshot() will return an Image object of the screen, or you can pass it a filename to save it to a file.
+locateOnScreen() is passed a sample image file, and returns the coordinates of where it is on the screen.
+locateCenterOnScreen() will return an (x,y) tuple of the where the image is on the screen.
+Combining the keyboard/mouse/screenshot functions lets you make awesome stuff :)
+
+
+CONGRATULATIONS! (And next steps...)
+Coding to automate lets you do more stuff.
+It's not about being a genius, you just need to keep learning.
+python.org 
+
+
+
+/-/-/-/--/-/-/-/-/-/-/-/-/
+
+
+GOOGLE DEV COURSE NOTES:
+-"When a Python file is run directly, the special variable "__name__" is set to "__main__". Therefore, it's common to have the boilerplate if __name__ ==... shown above to call a main() function when the module is run directly, but not when the module is imported by some other module."
+
+reminder that sys.argv tells you what command line arguments called the program- sys.argv[0] is program, [1] is first arg, etc.
+
+ The first line of a function can be a documentation string ("docstring") that describes what the function does. 
+
+  It's typical to def a main() function towards the bottom of the file with the functions it calls above it.
+
+  Python checks code at runtime vs compile time. So other languages will be like "uhhhh" earlier in the process, which can be advantageous, but require more work to carefully define typing.
+  Other languages have types for variables, Python is just like \_O_/ which is cool but means you need descriptive names for them since that's all you have to go on. 
+
+  Naming-wise, this_method_is_preferred butCamelCasingIsFine and you should use it if you're adding to code that is already made that way.
+
+You can't name stuff after keywords (True = 'True' wouldn't work) but you can after builtin functions so be careful about that lol
+
+http://docs.python.org/library is standard library
+
+namespace = variable name-to-object binding
+
+help(thing) gives you docs on thing
+dir(thing) gives you a quick list of attributes
+
+
+STRINGS
+strings can have multiple lines but backslash at the end of each line
+reminder that strings are immutable, anything that 'changes' one just makes a new one with the changes.
+Python's starting stuff at [0] is 'zero-based indexing' and Java and C++ work that way too. Python's style is to halt if it can't tell that to do, vs other programming languages like Perl that just make stuff up. Slices are so good. slice[0:3] gets the first-fourth thing, slice[:10] gets everything before [10], slice[3:] gets everything afer [3]
+People apparently use len as a variable too much. 
+
+In addition to normal math operators, // does integer division (6//5 == 1). Python 2 does this by default with /.
+r'string' is raw string ignores escape characters
+u'string' is unicode string literal
+You can leave a trailing comma at the end of a string to avoid newlines.
+
+String slices:
+
+'H  E  L  L  O'
+ 0  1  2  3  4
+-5 -4 -3 -2 -1
+ 
+ s[:n] + s[n:] == s
+
+'formatting a {}'.format('string') will evaluate to 'formatting a string' but NOTE that this means you can keep changing it since that's a method.
+
+test = 'this is a {} string' will show up as that
+but you could do silly stuff like list ['1', '2', '3'], string = 'string number {}' and then 
+for x in list: print(string.format(x))
+or even list_of_string_numbers = [string.format(number) for numbers in list]
+
+f'this is a {var1} {var2}'
+
+Enclosing stuff in an outer set of parentheses lets it span multiple lines since Python by default cares about whitespace.
+
+
+PYTHON 2 has some nonsense where https://developers.google.com/edu/python/strings#i18n-strings-unicode just look at it
+Unicode srings:
+ustring = u'A unicode \u018e string \xf1'
+
+Dictionarys: strings, numbers, tuples work as keys, anything can be a value. You can possibly get away with mutable values as keys but it's a BAD IDEA since MUTABLE. Use 'in' to check if key is in dictionary or dict.get(key) 
+
+Dictionaries are SO GOOD
+
+-tt in boilerplate flag that makes it halt if it sees mixes of tabs/spaces
+
+to make a copy of a list, use slice syntax
+
+b = a means they point to the same list
+b = a[:] makes a new list
+
+TUPLES are immutable, good for grouping stuff you know is never going to change.
+If you're sorting tuples, it sorts by the first thing and then sorts identical first value tuples by second value.
+
+(x,y) = (1,2) is parallel assignment
+x = 1
+y = 2
+
+hashtable is just another word for dictionary
+
+for k in sorted(d.keys()): print('key: ', k, '->', d[k]) gives you everything inside dict sorted by k.
+
+d.items() gets tuples (length 2) for everything in d
+
+for tuple in d.items(): print(tupe)
+
+BE conscious if giving your variables descriptive names, like seriously make sure you include type:
+lists end with s so words, lines, etc
+
+/-/-/-/--/-/-/-/-/-/-/-/-/
+
+PEP 8 Naming conventions:
+
+never use l, O, I : like letters
+
+functions: lower_case_words
+variables: single letters okay, lower_case_words also okay
+constants: CAPITAL_WORDS
+classes: CapitalFirstLetters
+class methods: lower_case_words
+module = lower_case_words (pref short_words)
+package = lowercasewords
+
+use descriptive terms:
+name = 'John Smith' yes
+x = 'John Smith' no
+
+dbl() no
+multiply_by_two yes
+
+stay consistent, follow a style
+use meaningful names.
+typing longer names may save you time
+
+
+Google dev course:
+UTILITIES: OS And Commands
+os, shutil, command (python 2), subprocess (python 3) are the modules for fucking around 
+
+
+Command line flags are useful for code reuse and modularity.
+
+Look at google's python exercises (logpuzzle and babynames and copyspecial) to review this stuff
+
+list comprehensions are the most fucking elite thing
+s
+
+
+
+/-/-/-/--/-/-/-/-/-/-/-/-/
+
+DATA STRUCTURES AND ALGORITHMS IN PYTHON
+
+http://bcs.wiley.com/he-bcs/Books?action=index&itemId=1118290275&bcsId=8029
+student website
+
+CH 1 
+JUUUUST got that IDLE is a monty python joke
+
+ASSIGNMENT STATEMENT:
+ x = y
+ x is an identifier (or name)
+ assigning associates the identifier with the object on the other side of the = sign
+ y is the object
+
+
+ classes
+ instantiate to create a new instance
+ to instantiate invoke the constructor
+
+ w = Widget()
+ w = Widget(a, b, c)
+
+ some functions will do so -> sorted(list) returns a new instantiation of the list class.
+
+ methods are also known as memmber functions
+ methods are either accessors (don't change) or update methods aka MUTATORS
+
+ built in classes:
+ bool -> Boolean Value, IMMUTABLE
+ int -> integer, IMMUTABLE
+ float -> floating-point number, IMMUTABLE
+ list -> a mutable list of objects
+ tuple -> immutable sequence of objects, IMMUTABLE
+ str -> character string, IMMUTABLE
+ set -> unordered set of distinct objects
+ frozenset -> immutable form of set class, IMMUTABLE
+ dict -> associative mapping (aka dictionary)
+
+list, tuple, are sequences: means order matters
+
+[LIST]: is an index of references, an array-based sequence, zero-indexed
+backup = list(data) makes new references to all the stuff in data, vs backup = list which is just another name for the same sequence of existing references
+
+(TUPLE,): an immutable sequence, a list that can't change. (12, 14) is a tuple. (12) is not. (12,) is. 
+
+{set} is like a list but: no order, no duplicates, can only contain immutable things. This is much quicker to check if something's in it. 
+
+frozenset is immutable version of set, which is relevant if you want to have a set of sets. 
+
+{dict: } is like a set but each key in it has a value that is associated with it, form is {key1: values1, key2: value2}. {} makes dict and not set because dict came first in python.
+
+
+
+
+
+
+and/or short-circuit: if first operand would let them return True or False, they will without looking at second. This is relevant b/c:
+if list and list[-1] == int:
+will not throw an error on empty list.
+
+
+/-/-/-/--/-/-/-/-/-/-/-/-/
+
+Personal notes:
+
+Figure out the algorithm, then implement it.
+
+
+IF YOU NEED TO LOOP OVER MULTIPLE LISTS
+Referencing by index:
+for index, thing in enumerate(list1):
+	print(thing + list2[index])
+
+alternatively if you want the first in each:
+for header, rows in zip(headers, columns):
+	print(f'{header}: {''.join(rows)})
+
+
+
+
+
+
+TODO:
+-leetcode TUTELAGE
+-remaining chapters of automate 2e that weren't in main course (chapter 18+)
+-look into itertools
+
+
+
