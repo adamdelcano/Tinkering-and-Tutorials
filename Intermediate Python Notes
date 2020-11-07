@@ -820,3 +820,63 @@ def decode_user(o):
     return dct
 
 user = json.loads(userJSON, object_hook=decode_user)
+-----------
+RANDOM NUMBERS
+
+Used to generate pseudorandom numbers
+
+
+# Popular functions
+
+import random
+a = random.random()  # prints a random float in range 0-1
+a = random.uniform(1,10)  # prints a random float in range 1-10)
+a = random.randint(1,10)  # integers, does include bounds!
+a = random.randrange(1,10)  # doesn't include upper bound, range() style
+a = random.normalvariate(mu, sigma) <- mu == mean, sigma == stddev
+
+mylist = list("ABCDEFGH")
+mylist == ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+a = random.choice(mylist)  # picks a random choice from mylist
+a = random.sample(mylist, 3)  # picks 3 unique choices from mylist
+a = random.choices(mylist, k=3)  # picks 3 choices, can pick same elements multiple times
+random.shuffle(mylist)
+mylist == ['C', 'G', 'B', 'A', 'E', 'F', 'D', 'H']
+
+
+# Beware the fact that it's psuedorandom
+random.seed(1)
+print(random.randint(1,6))  # example of dice
+# returns 2, 5, 1, 3
+# but if we go back to the same seed point 
+random.seed(1)
+print(random.randing(1,6))
+2  # the
+print(random.randing(1,6))
+5  # same
+print(random.randing(1,6))
+1  # output
+print(random.randing(1,6))
+3  # happens!
+DO NOT USE THESE FOR SECURITY PURPOSES
+
+# Cryptographically reasonably secure
+import secrets  # much more resource-intensive
+a = secrets.randbelow(10)  # produces a crypto-random number between 0 and 10, not including 10
+a = secrets.randbits(k=4)  # returns a crypto-random with 4 bits, so 1010, or 0010, etc
+a = secrets.choice(mylist)  # returns a crypto-random selection from the list
+
+
+# if you want maths
+
+import numpy as np  # does not need random imported
+a = np.random.rand(3)  # returns an array with three random floats
+a = np.random.rand(3,3)  # returns a 3x3 array with random floats
+a = np.random.randint(0, 10, 3)  # fills random ints based on lower bound, upper bound, qty of ints
+a = np.random.randint(0, 10, (3,4)  # same but 3x4 array 
+arr = np.array([1,2,3], [4,5,6], [7,8,9])
+np.random.shuffle(arr)  # shuffles along the axis, so
+arr == ([1,2,3], [7,8,9], [4,5,6])
+# has own seed method, which is important because messing with one won't mess with the other:
+np.random.seed()
+-----------
