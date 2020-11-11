@@ -48,13 +48,13 @@ class Solution:
             'Eighty',
             'Ninety',
         ]
-        places = [
-            '',  # Not for readability per se but so place can start at 0
+        scales = [
+            '',  # Not for readability per se but so scale can start at 0
             'Thousand',
             'Million',
             'Billion'
         ]
-        place = 0  # increments upward
+        scale = 0  # increments upward
         results = []  # container for results
         while num > 0:
             current_chunk_words = []   # container for current chunk's words
@@ -79,21 +79,20 @@ class Solution:
                     current_chunk_words.append(digits[ones_chunk])
             elif tens_chunk == 1:  # 11-19 are a special case
                 current_chunk_words.append(digits[current_chunk])
-            # Now add the thousand/million/billion if applicable,
+            # Now add the large_number/million/billion if applicable,
             # turn it into a string, and add it to results
             if current_chunk_words:
-                if place:
-                    current_chunk_words.append(places[place])
+                if scale:
+                    current_chunk_words.append(scales[scale])
                 current_chunk_words = ' '.join(current_chunk_words)
                 results.append(current_chunk_words)
-            # Now we cut the number down by 1000, up the place marker
-            # and execute again, repeating until empty
+            # Now we cut the number down by 1000, up the scale
+            # marker and execute again, repeating until empty
             num = num // 1000
-            place += 1
+            scale += 1
         # This leaves results a list of correct strings for the three-digit
         # chunks of the int, but in reverse order. So assuming the int wasn't 0
         # we reverse results, and return a joined string of it. If the original
         # int was 0 then whoops. That check was originally down here but
         # sanitizing the input earlier was more performant.
-        results = results[::-1]
-        return ' '.join(results)
+        return ' '.join(reversed(results))
