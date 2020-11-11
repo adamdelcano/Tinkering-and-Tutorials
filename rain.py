@@ -26,9 +26,10 @@ class Solution:
             if left_cursor["height"] < right_cursor["height"]:
                 left_cursor["index"] += 1
                 left_cursor["height"] = height[left_cursor["index"]]
-                if left_cursor["height"] > left_cursor["max_height"]:
-                    left_cursor["max_height"] = left_cursor["height"]
-                elif left_cursor["height"] < right_cursor["max_height"]:
+                left_cursor["max_height"] = max(
+                    left_cursor["max_height"], left_cursor["height"]
+                )
+                if left_cursor["height"] < right_cursor["max_height"]:
                     rain += (
                         min(
                             left_cursor["max_height"],
@@ -38,9 +39,10 @@ class Solution:
             elif right_cursor["height"] <= left_cursor["height"]:
                 right_cursor["index"] -= 1
                 right_cursor["height"] = height[right_cursor["index"]]
-                if right_cursor["height"] > right_cursor["max_height"]:
-                    right_cursor["max_height"] = right_cursor["height"]
-                elif right_cursor["height"] < left_cursor["max_height"]:
+                right_cursor["max_height"] = max(
+                    right_cursor["max_height"], right_cursor["height"]
+                )
+                if right_cursor["height"] < left_cursor["max_height"]:
                     rain += (
                         min(
                             left_cursor["max_height"],
