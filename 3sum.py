@@ -4,7 +4,8 @@ class Solution:
         Finds the unique combinations of 3 elements (triplets)
         that have a sum of 0 in the list.
 
-        Given an array nums of n integers, are there elements a, b, c in nums such that a + b + c = 0?
+        Given an array nums of n integers, are there elements a, b, c in nums
+        such that a + b + c = 0?
         Find all unique triplets in the array which gives the sum of zero.
 
         Notice that the solution set must not contain duplicate triplets.
@@ -26,13 +27,14 @@ class Solution:
         """
         if not nums:   # sanitization
             return []
-        triplets = []  # Container for our solution
-        nums.sort()  # Sorting this allows for optimization
-        num_reverse = [i for i in reversed(nums)]  # I'm not proud
-        num_set = set(nums)  # I cannot emphasize enough how not proud I am
-        # Since the list is now sorted, we don't ever need to check numbers
-        # as small or smaller than ones we've checked already - we will have
-        # found all unique triplets for them already.
+        triplets = {}  # Container for our solution, dict so we can skip dupes
+        nums.sort()  # Sorting this allows for optimization in iterating
+        num_dict = {}  # This lets us do O(1) lookups.
+        for num in nums:
+            if num in num_dict:
+                num_dict[num] += 1  # Only really cares if >= 3
+            else:
+                num_dict[num] = 1
         # We also don't need to check anything bigger than min * -1 because it
         # can't result in zero, since again, sorted list.
         min_num = nums[0] - 1
@@ -56,10 +58,18 @@ class Solution:
                     second_min = second_num
                 # given x + y + z = 0, and knowing x and y, we know z
                 third_num = -1 * (num + second_num)
-                # for very large lists the set check does a lot of work
-                if third_num in num_set:
-                    #  This next line seems like there has to be a better way
-                    if third_num in num_reverse[:-2 - (index + second_index)]:
-                        threesum = [num, second_num, third_num]
-                        triplets.append(threesum)
-        return triplets
+                # check if the third number is in the dict
+                if third_num in num_dict:
+                    # Also need to check against quantity, so that this doesn't
+                    # see [-4,0,1,2] and return [-4,2,2]
+                    matches = 0
+                    if num == third_num:
+                        matches += 1
+                    if second_num == third_num:
+                        matches += 1
+                    if num_dict[third_num] > matches:
+                        # Add the numbers in ascending order as dict key
+                        threesum = tuple(sorted([num, second_num, third_num]))
+                        triplets[threesum] = None
+        # it wants a list
+        return list(triplets)
