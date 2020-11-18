@@ -24,21 +24,12 @@ class Solution:
         0 <= nums.length <= 3000
         -105 <= nums[i] <= 105
         """
-        if not nums:   # sanitization
+        if not nums or len(nums) < 3:   # sanitization
             return []
-        triplets = set()  # Container for our solution, set lets us cut dupes
-        nums.sort()  # Sorting this allows for optimization
+        triplets = []
+        nums.sort()  # Sorting this lets us use math to think stuff through.
         # We also don't need to check anything bigger than min * -1 because it
         # can't result in zero, since again, sorted list.
-        num_dict = {}
-        # I tried a dict comprehension: 
-        # num_dict = {num:nums.count(num) for num in nums}
-        # but it was slower than the loop
-        for index, num in enumerate(nums):
-            if num in num_dict:
-                num_dict[num] += 1
-            else:
-                num_dict[num] = 1
         min_num = nums[0] - 1
         max_num = -1 * min_num
         for index, num in enumerate(nums):
@@ -47,33 +38,32 @@ class Solution:
             elif num >= max_num:
                 break  # if we're above upper bound just stop entirely
             else:
-                # update bounds
+                # update lower bound
                 min_num = num
-                max_num = -1 * num
-                second_min = min_num - 1  # same rationale for the inner loop
-            for second_index, second_num in enumerate(nums[index + 1:]):
-                # same skipping over checked stuff here
-                if second_num <= second_min:
-                    continue
-                if second_num > max_num:
-                    break
-                else:
-                    second_min = second_num
-                # given x + y + z = 0, and knowing x and y, we know z
-                third_num = -1 * (num + second_num)
-                # dict lookup followed by check that we're not using
-                # an item in the list as a match with itself
-                if third_num in num_dict:
-                    matches = 0
-                    if num == third_num:
-                        matches += 1
-                    if second_num == third_num:
-                        matches += 1
-                    if num_dict[third_num] > matches:
-                        # making this a sorted tuple means we can skip
-                        # duplicate entries. 
-                        triplets.add(
-                            tuple(sorted((num, second_num, third_num)))
-                        )
-        # then convert it into a list, ta-da
-        return list(triplets)
+            # Trying the cursors at low and high ends of list
+            # and using the fact that I can tell which way I need to move
+            # to implement a more memory-efficient search without using a dict.
+            # It IS slower though. I think outside of showing how I'd do it
+            # without one, the dict usually makes more sense?
+            # low / high could be left / right
+            low = index + 1
+            high = len(nums) - 1
+            while low < high:
+                # check if result is 0, if over 0 move high down, if under 0
+                # move low up, if it's 0 add it and then move the cursors
+                # appropriately
+                result = num + nums[low] + nums[high]
+                if result > 0:
+                    high -= 1
+                elif result < 0:
+                    low += 1
+                elif result == 0:
+                    triplets.append((num, nums[low], nums[high]))
+                    # these while loops skip until a unique value
+                    while low < high and nums[low] == nums[low + 1]:
+                        low += 1
+                    low += 1
+                    while high > low and nums[high] == nums[high - 1]:
+                        high -= 1
+                    high -= 1
+        return triplets
