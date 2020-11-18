@@ -879,4 +879,72 @@ np.random.shuffle(arr)  # shuffles along the axis, so
 arr == ([1,2,3], [7,8,9], [4,5,6])
 # has own seed method, which is important because messing with one won't mess with the other:
 np.random.seed()
------------
+--------------------------------------------
+
+D E C O R A T O R S
+
+Two kinds: function decorator and class decorator, function decorator is more common.
+
+Function decorators look like:
+
+@mydecorator  # this part is the decorator
+def do_something():
+    pass
+
+They essentially take the function they're decorating as an argument, and extend the function's
+functionality by doing so. If you had 
+
+def do_twice(func):
+    def wrapper():
+        func()
+        func()
+    return wrapper
+
+@do_twice
+def hello_world():
+    print('Hello world!')
+
+if you call hello_world() it will print 'Hello World!' 'Hello World!'
+BUT if the function has arguments things get weirder.
+
+@do_twice
+def hello(name):
+    print(f'Hello {name}'')
+it will break- because the wrapper takes no arguments but was given one.
+
+To do that you want:
+def do_twice(func):
+    def wrapper(*args, **kwargs):  # now it will take all the arguments and keyword arguments we want!
+        func(*args, **kwargs)   # also passing them to the functions
+        func(*args, **kwargs)
+    return wrapper
+
+@do_twice
+def greet(name):
+    print(f'Hello {name}!')
+
+Further complication is return values:
+@do_twice
+def add5(x):
+   return x + 5
+
+add5(10) # will do nothing because the 15 is returned inside the wrapper, which never passes it back
+
+You want to have it return the function's return inside the wrapper, ex:
+def do_twice(func):
+    def wrapper(*args, **kwargs):  # now it will take all the arguments and keyword arguments we want!
+        return [
+            func(*args, **kwargs)   # also passing them to the functions
+            func(*args, **kwargs)
+        ]
+    return wrapper
+
+@do_twice
+def add5(x):
+    return x + 5
+
+add5(10) will return [15,15] now at least.
+
+
+
+@
