@@ -47,54 +47,23 @@ class Solution:
         lists[i] is sorted in ascending order.
         The sum of lists[i].length won't exceed 10^4.
         """
-
-        # sanitize by removing empty linked lists, which are a possibility
-        # then find the smallest value for initializing the head/tail
-        if not lists:
+        # cheaty fast way: flatten everything into a reg list, sort it,
+        # construct a new linked list
+        node_vals = []
+        for node in lists:
+            while node:
+                node_vals.append(node.val)
+                try:
+                    node = node.next
+                except AttributeError:
+                    pass
+        if not node_vals:  # if empty input or [[]]
             return None
-        next_val = float('inf')
-        next_index = None
-        purge_list = []  # So I don't have to modify list midloop
-        for index, node in enumerate(lists):
-            if not node:
-                purge_list.append(index)
-            elif node.val < next_val:
-                next_val = node.val
-                next_index = index
-        # instantiate head and tail and new tail values
-        try:
-            merge_head = lists[next_index]
-        except TypeError:
-            return None
+        node_vals.sort(reverse=True)
+        merge_head = ListNode(node_vals.pop(), next=None)
         merge_tail = merge_head
-        # move to next node in the chosen linked list
-        try:
-            lists[next_index] = lists[next_index].next
-        except AttributeError:  # if it was a one-entry list
-            pass
-        # cull empty linked lists
-        while purge_list:
-            del lists[purge_list.pop()]
-        # collect smallest value every pass, use it for new tail
-        while lists:
-            next_val = float('inf')
-            next_index = -1
-            for index, node in enumerate(lists):
-                if not node:
-                    purge_list.append(index)
-                elif node.val < next_val:
-                    next_val = node.val
-                    next_index = index
-            if next_val == float('inf'):  # if the list was just a single None
-                return merge_head
-            new_tail = ListNode(next_val, next=None)
+        while node_vals:
+            new_tail = ListNode(node_vals.pop(), next=None)
             merge_tail.next = new_tail
             merge_tail = new_tail
-            try:
-                lists[next_index] = lists[next_index].next
-            except AttributeError:
-                pass
-            # cull empty linked lists
-            while purge_list:
-                del lists[purge_list.pop()]
         return merge_head
