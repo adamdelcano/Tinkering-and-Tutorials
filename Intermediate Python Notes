@@ -946,5 +946,42 @@ def add5(x):
 add5(10) will return [15,15] now at least.
 
 
+functools lets you preserve the __help/__name/etc 
 
-@
+import functools
+
+@functools.wrap(func)
+def start_end_decorator(func):
+
+etc
+
+Class decorators are also a thing. They do the same thing as function decorators, but are
+typically used if you want to maintain and keep track of a state, example:
+
+class CountCalls:
+
+    def __init__(self, func):
+        self.func = func
+        self.num_calls = 0
+
+    def __call__(self, *args, **kwargs):
+        self.num_calls += 1
+        print(f'This is execution number {self.num_calls}.')
+
+@CountCalls
+def say_hello():
+   print('Hello')
+
+say_hello()
+say_hello()
+
+would return:
+'This is execution number 1.'
+'Hello'
+'This is execution number 2.'
+'Hello'
+
+
+--------------------------------------------
+
+G E N E R A T O R S
