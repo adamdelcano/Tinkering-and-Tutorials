@@ -16,7 +16,6 @@ async def get_history(stock: str, window: int) -> pd.DataFrame:
     and an int window which represents a number of days, and returns a pandas
     dataframe.
     """
-    window += 1
     stock_obj = yf.Ticker(stock)
     today = date.today()
     # window + 1 here so that the range is actually len(window)
