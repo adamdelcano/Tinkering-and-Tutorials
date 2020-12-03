@@ -6,6 +6,7 @@ from aiohttp import web
 import pandas as pd
 
 from sec_process import extrapolate
+from sec_process import Stock
 
 
 async def index(request: web.Request) -> web.Response:
@@ -20,6 +21,36 @@ async def index(request: web.Request) -> web.Response:
     static_page = open('./test_page.html', 'r').read()
 
     return web.Response(text=static_page, content_type='text/html')
+
+
+async def ticker_forecast(request: web.Request) -> web.json_response:
+    """
+    Receives a request containing a string/int of ticker and window, and
+    uses the Stock class to generate a response, while logging at each step.
+    """
+    logging.info(f'Received {str(request)}.')
+    try:
+        requested_stock = await request.json()
+        logging.info('Json received and decoded')
+    except json.decoder.JSONDecodeError:
+        logging.warning('Unparseable data: Returned error to sender.')
+        raise web.HTTPBadRequest(reason='''
+            Message was not POST with recognizeable json.
+            ''')
+    logging.info(f'Processed: {requested_stock}')
+    current_stock = Stock(
+        requested_stock['Ticker'],
+        requested_stock['Window']
+    )
+    logging.info(f'Stock: {current_stock}')
+    await current_stock.get_history()
+    logging.info(f'Prices: {current_stock.prices}')
+    await current_stock.extrapolate_next_day()
+    logging.info(f'Sending {str(current_stock.next_price)}')
+    return web.json_response(
+        current_stock.next_price,
+        dumps=pd.io.json.dumps
+    )
 
 
 async def forecast(request: web.Request) -> web.json_response:
