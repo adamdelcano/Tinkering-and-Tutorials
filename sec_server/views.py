@@ -23,7 +23,7 @@ async def index(request: web.Request) -> web.Response:
     return web.Response(text=static_page, content_type='text/html')
 
 
-async def ticker_forecast(request: web.Request) -> web.json_response:
+async def window_forecast(request: web.Request) -> web.json_response:
     """
     Receives a request containing a string/int of ticker and window, and
     uses the Stock class to generate a response, while logging at each step.
