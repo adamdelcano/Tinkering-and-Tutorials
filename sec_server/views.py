@@ -33,14 +33,18 @@ async def window_forecast(request: web.Request) -> web.json_response:
         requested_stock = await request.json()
         logging.info('Json received and decoded')
     except json.decoder.JSONDecodeError:
-        logging.warning('Unparseable data: Returned error to sender.')
+        logging.warning(f'Unparseable data {str(request)}: sent back 400.')
         raise web.HTTPBadRequest(reason='''
             Message was not POST with recognizeable json.
             ''')
     logging.info(f'Processed: {requested_stock}')
+    # seems worth it to make it case insensitive
+    requested_stock = {
+        k.lower(): v for k, v in requested_stock.items()
+    }
     current_stock = Stock(
-        requested_stock['Ticker'],
-        requested_stock['Window']
+        requested_stock['ticker'],
+        requested_stock['window']
     )
     logging.info(f'Stock: {current_stock}')
     await current_stock.get_history()

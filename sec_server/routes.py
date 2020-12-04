@@ -9,7 +9,7 @@ def setup_routes(app: web.Application) -> None:
 
     index: static html testing page
 
-    window_forecast: given json containing "Ticker" and "Window" uses yfinance
+    window_forecast: given json containing "ticker" and "window" uses yfinance
     to send back an extrapolation based on the last window days of that stock
     ticker.
     TODO: add mongodb / motor integration
