@@ -12,7 +12,6 @@ def setup_routes(app: web.Application) -> None:
     window_forecast: given json containing "ticker" and "window" uses yfinance
     to send back an extrapolation based on the last window days of that stock
     ticker.
-    TODO: add mongodb / motor integration
 
     forecast:  takes in a json serialized dataframe of prices that has
     securities as columns and is datetime indexed, and then returns a json

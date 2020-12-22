@@ -2,7 +2,7 @@ import json
 import logging
 
 from aiohttp import web
-
+import motor.motor_asyncio
 import pandas as pd
 
 from sec_process import extrapolate
@@ -24,11 +24,13 @@ async def index(request: web.Request) -> web.Response:
 
 
 async def window_forecast(request: web.Request) -> web.json_response:
+
     """
     Receives a request containing a string/int of ticker and window, and
     uses the Stock class to generate a response, while logging at each step.
     """
     logging.info(f'Received {str(request)}.')
+    db = request.app['db']
     try:
         requested_stock = await request.json()
         logging.info('Json received and decoded')
@@ -44,17 +46,28 @@ async def window_forecast(request: web.Request) -> web.json_response:
     }
     current_stock = Stock(
         requested_stock['ticker'],
-        requested_stock['window']
+        requested_stock['window'],
+        db
     )
     logging.info(f'Stock: {current_stock}')
-    await current_stock.get_history()
+    current_stock.get_prices()
     logging.info(f'Prices: {current_stock.prices}')
     await current_stock.extrapolate_next_day()
     logging.info(f'Sending {str(current_stock.next_price)}')
-    return web.json_response(
-        current_stock.next_price,
-        dumps=pd.io.json.dumps
-    )
+    # feature creep: displaying the history of stock over window days
+    if 'history' in requested_stock and (
+        requested_stock['history'] in ('y', 'yes', 1, True)
+    ):
+        return web.Response(
+            text=f'''{current_stock.prices}\n
+            Prediction:\n
+            {pd.io.json.dumps(current_stock.next_price, indent=1)}'''
+        )
+    else:
+        return web.json_response(
+            current_stock.next_price,
+            dumps=pd.io.json.dumps
+        )
 
 
 async def forecast(request: web.Request) -> web.json_response:
