@@ -3,6 +3,7 @@ import concurrent.futures
 from datetime import date
 from functools import partial
 import logging
+import traceback
 
 import motor.motor_asyncio
 import pandas as pd
@@ -12,9 +13,11 @@ import yfinance as yf
 # This chunk is for the window_forecast endpoint
 class Stock:
     """
-    Class representing a single stock. Has methods to check and update prices.
-
-
+    Class representing a single stock. This object handles the data
+    operations of the window_forecast endpoint in views.py. Has methods to
+    fetch prices from mongodb, check for missing data, retrieve it from a
+    yfinance.Ticker object, compare the two dataframes and then interpolate
+    based on the comparison. 
 
     """
 
@@ -43,7 +46,7 @@ class Stock:
         next_day: datetime.date object for the day after the end of date_range,
         which will be either today or tomorrow depending on when it's called
 
-        prices: initially Nonetype, is filled with dataframe of prices for the
+        prices: initially Nonetype, is filled with DataFrame of prices for the
         ticker chosen over the course of date_range
 
         next_price: the extrapolated price based on prices for the next day of
@@ -63,6 +66,22 @@ class Stock:
         self.prices = None  # this will contain the prices
         self.next_price = None  # this will contain extrapolated price
 
+    async def _check_mongo(self) -> pd.DataFrame:
+        """
+        Queries mongodb for documents matching the ticker in the window.
+
+        Builds a pipeline to query, then creates an AsyncIOMotorCursor
+        using the pipeline and builds a DataFrame out of that cursors' to_list
+        results.
+        """
+        pipeline = []
+        ticker_name = {"$match": {"ticker": self.ticker}}
+        dates = {"$match": {"date": {"$in": {self.date_range}}}}
+        pipeline.extend(ticker_name, dates)
+        cursor = await self.db.aggregate(pipeline)
+        documents = await cursor.to_list()
+        return pd.DataFrame(documents)
+
     async def _get_yf(
         self,
         beginning: date = None,
@@ -71,8 +90,13 @@ class Stock:
         """
         Returns the ticker's prices from yfinance.
 
+        Note that yfinance is NOT ASYNCHRONOUS- this function gets the event
+        loop and calls yfinance via run_in_executor to handle the I/O-bound
+        blocking nature thereof.
+
         beginning: a datetime.date object representing the first day
         ending: a datetime.date object representing the last day
+
 
         """
         if not beginning:
@@ -88,57 +112,108 @@ class Stock:
             end=ending
         )[-self.window:]  # cuts off so that it's just window number of days
 
-    async def get_prices(self):
+    async def dbless_get_prices(self):
         """
-        Public facing method for the class to update without mongodb.
+        Public facing method for the class to update in mongod-less use cases.
         Calls the _get_yf coroutine and sets self.prices to it
         """
         self.prices = await self._get_yf()
 
-    # NOT YET FUNCTIONAL!
-    # TODO: Should evaluate whether this is better done as upsert
-    async def mongo_insert(self, df: pd.DataFrame) -> None:
+    async def _mongo_insert(self, df: pd.DataFrame) -> None:
+        """
+        Processes the dataframe of missing data from Stock._combine_mongo_yf()
+        into the desired document format, then inserts it into mongodb. Logs
+        the number of inserted docs.
+        """
+        # TODO: evaluate whether this is possibly enough CPU overhead to be
+        # worth putting into a process pool.
         new_docs = [
             {
                 'ticker': self.ticker,
                 'date': date,
                 'price': price
             }
-            # triple list comprehension for style
+            # triple list comprehension to flex
             for date in df.index for col in df.columns for price in df[col]
         ]
 
         result = await self.db.insert_many(new_docs, ordered=False)
-        logging.info(f'Inserted {len(result.inserted_ids)} docs')
+        logging.info(
+            f'''Attempted to insert {len(new_docs)} docs.
+            Inserted {len(result.inserted_ids)} docs.'''
+        )
 
-    # TODO: Break this down into individual actions, it's doing too much
-    async def check_mongo(self) -> None:
+    async def _combine_mongo_yf(
+        self,
+        mongo_data: pd.DataFrame,
+        yf_data: pd.DataFrame
+    ) -> dict:
         """
-        Queries db about the ticker / dates.
+        Merges the mondogb and yfinance dataframes to form a union of them,
+        while de-indexing and re-indexing Date, then produces difference, which
+        is a facet showing only the yf_data missing from mongo_data, drops the
+        _merge column from each, and returns a dict of the two.
 
-        Builds a pipeline to query, then creates an AsyncIOMotorCursor
-        using the pipeline. Then builds a dataframe out of the cursors' to_list
-        result, compares it with the date_range, and queries _get_yf for the
-        missing dates, starting with the oldest and grabbing the newest.
-        It then concatenates them, and uses that to update the prices.
+        Calculating missing_prices vs yf_data might seem redundant, but
+        it's important to consider that as dates are only being requested in
+        windows, scenarios exist where the Venn diagram of mongo_data and
+        yf_data are concentric circles with mongo_data inside yf_data. For
+        example, if a user requested two weeks of data one week ago, and now
+        requests a full month. Thus yf_data could contain substantial
+        redundancy. That said, it may be more performant to simply return only
+        the full_prices dataframe and handling the faceting/dropping of the
+        _merge column in Stock.update_prices().
         """
-        pipeline = []
-        ticker_name = {"$match": {"ticker": self.ticker}}
-        dates = {"$match": {"date": {"$in": {self.date_range}}}}
-        pipeline.extend(ticker_name, dates)
-        cursor = await self.db.aggregate(pipeline)
-        documents = await cursor.to_list()
-        documents_df = pd.DataFrame(documents)
-        missing_dates = self.date_range.difference(documents_df)
-        if missing_dates.empty is False:
-            new_prices = await self._get_yf(
+        mongo_data.reset_index(inplace=True)
+        yf_data.reset_index(inplace=True)
+        full_prices = mongo_data.merge(yf_data, how='outer', indicator=True)
+        full_prices.set_index('Date', inplace=True)
+        missing_prices = full_prices.loc[lambda x: x['_merge'] == 'right_only']
+        full_prices.drop(columns=['_merge'], inplace=True)
+        missing_prices.drop(columns=['_merge'], inplace=True)
+        return {'full_prices': full_prices, 'missing_prices': missing_prices}
+
+    async def update_prices(self):
+        """
+        Public-facing method to update the prices using the other
+        class methods. Checks mongodb, checks that for missing data,
+        retrieves yfinance data for the period between oldest and most recent
+        missing dates, uses _combine_mongo_yf to get the full prices and the
+        missing prices, and then inserts only the missing prices into mongodb,
+        and updates Stock.prices with the full prices.
+
+        """
+        logging.info('Checking mongodb')
+        mongo_prices = await self._check_mongo()
+        missing_dates = None
+        if mongo_prices.empty:  # just use yfinance and send it all to mongodb
+            logging.info(
+                f'No data for {self.ticker} found in mongodb, using yf'
+            )
+            full_prices = await self._get_yf()
+            logging.info('Inserting yf data to mongodb')
+            await self._mongo_insert(full_prices)
+        else:
+            logging.info(f'Checking for missing dates.')
+            missing_dates = self.date_range.difference(mongo_prices.index)
+        # This section could all be nested under the preceding else but seemed
+        # more readable to me as a separate bit of flow control. The initial
+        # if statement here checking whether missing dates is a non-empty
+        # dataframe is admittedly a bit ugly.
+        if missing_dates and not missing_dates.empty:
+            logging.info('Acquiring missing dates from yf')
+            yf_prices = await self._get_yf(
                 missing_dates[0], missing_dates[-1]
             )
-            await self.mongo_insert(new_prices)
-            full_prices = pd.concat([documents_df, new_prices]).sort_index()
-
+            if yf_prices.empty is False:
+                price_dict = await self._combine_mongo_yf(
+                    mongo_prices, yf_prices
+                )
+                logging.info('Inserting yf data to mongodb')
+                await self._mongo_insert(price_dict['missing_prices'])
+                full_prices = price_dict['full_prices']
         else:
-            full_prices = documents_df
+            full_prices = mongo_prices
         self.prices = full_prices
 
     async def extrapolate_next_day(self) -> None:
@@ -164,15 +239,15 @@ class Stock:
 # From here on this is for the forecast endpoint
 async def process(data: dict) -> pd.DataFrame:
     """
-    Converts incoming data to dataframe.
+    Converts incoming data to DataFrame.
 
     At this time this is an extremely simple function, separated out for the
     purpose of expanding to handle errors.
 
     Takes a dict as sole parameter, logs it, and then
-    converts it into a pandas dataframe, which it returns.
+    converts it into a pandas DataFrame, which it returns.
     """
-    logging.info(f'Converting {data} to dataframe')
+    logging.info(f'Converting {data} to DataFrame')
     df = pd.DataFrame(data)
     return df
 
@@ -181,16 +256,16 @@ async def extrapolate(data: dict) -> pd.DataFrame:
     """
     Extrapolates the data, adding new days with appropriate values.
 
-    Extrapolate uses the process function to create a pandas dataframe,
+    Extrapolate uses the process function to create a pandas DataFrame,
     converts the index to datetime, advances the date until it wouldn't be a
     weekend, appends that non-weekend date as the next blank row at the end
-    of the dataframe, then interpolates data to fill the new row. It then
-    converts the datetime index back to string and returns the dataframe.
+    of the DataFrame, then interpolates data to fill the new row. It then
+    converts the datetime index back to string and returns the DataFrame.
     It logs at each major step for redundance- note that logging is blocking.
 
     Takes a dict as sole parameter, returns a pd.DataFrame object
     """
-    # convert dict to dataframe
+    # convert dict to DataFrame
     df = await process(data)
     # Convert index to datetime, generate next day, append it as blank row
     logging.info('Calculating next day')
@@ -212,9 +287,8 @@ async def extrapolate(data: dict) -> pd.DataFrame:
 
 # Lazy testing
 if __name__ == "__main__":
-    import asyncio
     mrna = Stock('mrna', 30)
-    # using a pickled dataframe so I'm not a jerk
+    # using a pickled DataFrame so I'm not a jerk
     # mrna.get_history()
     mrna.prices = pd.read_pickle('./mrna_test_data.pkl')
     print(mrna.prices.iloc[-1])
