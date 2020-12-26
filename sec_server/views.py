@@ -50,7 +50,7 @@ async def window_forecast(request: web.Request) -> web.json_response:
         db
     )
     logging.info(f'Stock: {current_stock}')
-    current_stock.update_prices()
+    await current_stock.update_prices()
     logging.info(f'Prices: {current_stock.prices}')
     await current_stock.extrapolate_next_day()
     logging.info(f'Sending {str(current_stock.next_price)}')
