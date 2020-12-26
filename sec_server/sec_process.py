@@ -73,8 +73,12 @@ class Stock:
         Builds a pipeline to query, then creates an AsyncIOMotorCursor
         using the pipeline and builds a DataFrame out of that cursors' to_list
         results.
+
+        Converts the DateTimeIndex to a list b/c it's hashable whereas
+        DateTimeIndex isn't.
         """
         pipeline = []
+        dates = [date for date in self.date_range]
         ticker_name = {"$match": {"ticker": self.ticker}}
         dates = {"$match": {"date": {"$in": {self.date_range}}}}
         pipeline.extend(ticker_name, dates)
