@@ -80,10 +80,10 @@ class Stock:
         pipeline = []
         dates = [date for date in self.date_range]
         ticker_name = {"$match": {"ticker": self.ticker}}
-        dates = {"$match": {"date": {"$in": {self.date_range}}}}
-        pipeline.extend(ticker_name, dates)
-        cursor = await self.db.aggregate(pipeline)
-        documents = await cursor.to_list()
+        dates = {"$match": {"date": {"$in": dates}}}
+        pipeline.extend([ticker_name, dates])
+        cursor =  self.db.aggregate(pipeline)
+        documents = await cursor.to_list(1000)  # to_list needs max length
         return pd.DataFrame(documents)
 
     async def _get_yf(
