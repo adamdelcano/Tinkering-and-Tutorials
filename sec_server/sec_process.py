@@ -83,7 +83,7 @@ class Stock:
         dates = {"$match": {"date": {"$in": dates}}}
         pipeline.extend([ticker_name, dates])
         cursor =  self.db.aggregate(pipeline)
-        documents = await cursor.to_list(1000)  # to_list needs max length
+        documents = await cursor.to_list(None)
         return pd.DataFrame(documents)
 
     async def _get_yf(
@@ -170,12 +170,21 @@ class Stock:
         """
         mongo_data.reset_index(inplace=True)
         yf_data.reset_index(inplace=True)
-        full_prices = mongo_data.merge(yf_data, how='outer', indicator=True)
-        full_prices.set_index('Date', inplace=True)
-        missing_prices = full_prices.loc[lambda x: x['_merge'] == 'right_only']
-        full_prices.drop(columns=['_merge'], inplace=True)
-        missing_prices.drop(columns=['_merge'], inplace=True)
-        return {'full_prices': full_prices, 'missing_prices': missing_prices}
+        try:
+            full_prices = mongo_data.merge(yf_data, how='outer', indicator=True)
+            full_prices.set_index('Date', inplace=True)
+            missing_prices = full_prices.loc[
+                lambda x: x['_merge'] == 'right_only'
+            ]
+            full_prices.drop(columns=['_merge'], inplace=True)
+            missing_prices.drop(columns=['_merge'], inplace=True)
+            return {
+                    'full_prices': full_prices,
+                    'missing_prices': missing_prices
+            }
+        except pd.errors.MergeError:
+            logging.warning(f'{mongo_data.to_string()}')
+            logging.warning(f'{yf_data.to_string()}')
 
     async def update_prices(self):
         """
@@ -204,7 +213,7 @@ class Stock:
         # more readable to me as a separate bit of flow control. The initial
         # if statement here checking whether missing dates is a non-empty
         # dataframe is admittedly a bit ugly.
-        if missing_dates and not missing_dates.empty:
+        if missing_dates is not None  and not missing_dates.empty:
             logging.info('Acquiring missing dates from yf')
             yf_prices = await self._get_yf(
                 missing_dates[0], missing_dates[-1]
