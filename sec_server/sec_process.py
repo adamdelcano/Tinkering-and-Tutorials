@@ -3,7 +3,6 @@ import concurrent.futures
 from datetime import date
 from functools import partial
 import logging
-import traceback
 
 import motor.motor_asyncio
 import pandas as pd
@@ -17,7 +16,7 @@ class Stock:
     operations of the window_forecast endpoint in views.py. Has methods to
     fetch prices from mongodb, check for missing data, retrieve it from a
     yfinance.Ticker object, compare the two dataframes and then interpolate
-    based on the comparison. 
+    based on the comparison.
 
     """
 
@@ -82,7 +81,7 @@ class Stock:
         ticker_name = {"$match": {"ticker": self.ticker}}
         dates = {"$match": {"date": {"$in": dates}}}
         pipeline.extend([ticker_name, dates])
-        cursor =  self.db.aggregate(pipeline)
+        cursor = self.db.aggregate(pipeline)
         documents = await cursor.to_list(None)
         return pd.DataFrame(documents)
 
@@ -135,6 +134,7 @@ class Stock:
             {
                 'ticker': self.ticker,
                 'date': date,
+                'type': col,
                 'price': price
             }
             # triple list comprehension to flex
