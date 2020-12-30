@@ -213,6 +213,9 @@ class Stock:
                 f'No data for {self.ticker} found in mongodb, using yf'
             )
             full_prices = await self._get_yf()
+            if full_prices.empty:
+                logging.info('Ticker not responding to yf')
+                return "Error: Ticker not found. May be delisted."
             logging.info('Inserting yf data to mongodb')
             await self._mongo_insert(full_prices)
         else:
@@ -234,6 +237,7 @@ class Stock:
                 logging.info('Mongo prices were complete')
                 full_prices = mongo_prices
         self.prices = full_prices
+        return "Operation successful."
 
     async def extrapolate_next_day(self) -> None:
         """

@@ -50,7 +50,7 @@ async def window_forecast(request: web.Request) -> web.json_response:
         db
     )
     logging.info(f'Views: Stock: {current_stock}')
-    await current_stock.update_prices()
+    update = await current_stock.update_prices()
     logging.info(f'Views: Prices: {current_stock.prices}')
     await current_stock.extrapolate_next_day()
     logging.info(f'Views: Sending {str(current_stock.next_price)}')
@@ -59,14 +59,16 @@ async def window_forecast(request: web.Request) -> web.json_response:
         requested_stock['history'] in ('y', 'yes', 1, True)
     ):
         return web.Response(
-            text=f'''{current_stock.prices}\n
+            text=f'''{update}\n\n{current_stock.prices}\n\n
             Prediction:\n
             {pd.io.json.dumps(current_stock.next_price, indent=1)}'''
         )
     else:
-        return web.json_response(
-            current_stock.next_price,
-            dumps=pd.io.json.dumps
+        return web.Response(
+            text=f'''{update}\n\n
+            Prediction:\n\n
+            {pd.io.json.dumps(current_stock.next_price, indent=1)}
+            '''
         )
 
 
