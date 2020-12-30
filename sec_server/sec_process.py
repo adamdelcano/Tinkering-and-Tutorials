@@ -84,10 +84,14 @@ class Stock:
         pipeline.extend([ticker_name, dates])
         cursor = self.db.aggregate(pipeline)
         documents = await cursor.to_list(None)
-        documents_df = pd.DataFrame(documents).pivot(
-            index='Date', columns='Type', values='Price'
-        )
-        return documents_df
+        documents_df = pd.DataFrame(documents)
+        if documents_df.empty:
+            return documents_df
+        else:
+            documents_df = documents_df.pivot(
+                index='Date', columns='Type', values='Price'
+            )
+            return documents_df
 
     async def _get_yf(
         self,
