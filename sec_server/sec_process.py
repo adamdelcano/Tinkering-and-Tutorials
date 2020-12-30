@@ -4,6 +4,7 @@ from datetime import date
 from functools import partial
 import logging
 
+from aiohttp import web
 import motor.motor_asyncio
 import pandas as pd
 import yfinance as yf
@@ -83,7 +84,10 @@ class Stock:
         pipeline.extend([ticker_name, dates])
         cursor = self.db.aggregate(pipeline)
         documents = await cursor.to_list(None)
-        return pd.DataFrame(documents)
+        documents_df = pd.DataFrame(documents).pivot(
+            index='Date', columns='Type', values='Price'
+        )
+        return documents_df
 
     async def _get_yf(
         self,
@@ -128,17 +132,16 @@ class Stock:
         into the desired document format, then inserts it into mongodb. Logs
         the number of inserted docs.
         """
-        # TODO: evaluate whether this is possibly enough CPU overhead to be
-        # worth putting into a process pool.
+
         new_docs = [
             {
-                'ticker': self.ticker,
-                'date': date,
-                'type': col,
-                'price': price
+                'Ticker': self.ticker,
+                'Date': date,
+                'Type': col,
+                'Price': df.loc[date][col]
             }
-            # triple list comprehension to flex
-            for date in df.index for col in df.columns for price in df[col]
+            # previous versions hadn't thought through the list comprehension
+            for date in df.index for col in df.columns
         ]
 
         result = await self.db.insert_many(new_docs, ordered=False)
@@ -171,7 +174,9 @@ class Stock:
         mongo_data.reset_index(inplace=True)
         yf_data.reset_index(inplace=True)
         try:
-            full_prices = mongo_data.merge(yf_data, how='outer', indicator=True)
+            full_prices = mongo_data.merge(
+                yf_data, how='outer', indicator=True
+            )
             full_prices.set_index('Date', inplace=True)
             missing_prices = full_prices.loc[
                 lambda x: x['_merge'] == 'right_only'
@@ -179,12 +184,12 @@ class Stock:
             full_prices.drop(columns=['_merge'], inplace=True)
             missing_prices.drop(columns=['_merge'], inplace=True)
             return {
-                    'full_prices': full_prices,
-                    'missing_prices': missing_prices
+                'full_prices': full_prices,
+                'missing_prices': missing_prices
             }
         except pd.errors.MergeError:
-            logging.warning(f'{mongo_data.to_string()}')
-            logging.warning(f'{yf_data.to_string()}')
+            logging.warning(f'Merge failed: dumping: {mongo_data.to_string()}')
+            logging.warning(f'Merge failed: dumping: {yf_data.to_string()}')
 
     async def update_prices(self):
         """
@@ -204,6 +209,7 @@ class Stock:
                 f'No data for {self.ticker} found in mongodb, using yf'
             )
             full_prices = await self._get_yf()
+
             logging.info('Inserting yf data to mongodb')
             await self._mongo_insert(full_prices)
         else:
@@ -213,7 +219,7 @@ class Stock:
         # more readable to me as a separate bit of flow control. The initial
         # if statement here checking whether missing dates is a non-empty
         # dataframe is admittedly a bit ugly.
-        if missing_dates is not None  and not missing_dates.empty:
+        if missing_dates is not None and not missing_dates.empty:
             logging.info('Acquiring missing dates from yf')
             yf_prices = await self._get_yf(
                 missing_dates[0], missing_dates[-1]
@@ -226,6 +232,7 @@ class Stock:
                 await self._mongo_insert(price_dict['missing_prices'])
                 full_prices = price_dict['full_prices']
         else:
+            logging.info('Mongo prices were complete')
             full_prices = mongo_prices
         self.prices = full_prices
 

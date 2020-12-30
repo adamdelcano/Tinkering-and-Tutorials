@@ -49,11 +49,11 @@ async def window_forecast(request: web.Request) -> web.json_response:
         requested_stock['window'],
         db
     )
-    logging.info(f'Stock: {current_stock}')
+    logging.info(f'Views: Stock: {current_stock}')
     await current_stock.update_prices()
-    logging.info(f'Prices: {current_stock.prices}')
+    logging.info(f'Views: Prices: {current_stock.prices}')
     await current_stock.extrapolate_next_day()
-    logging.info(f'Sending {str(current_stock.next_price)}')
+    logging.info(f'Views: Sending {str(current_stock.next_price)}')
     # feature creep: displaying the history of stock over window days
     if 'history' in requested_stock and (
         requested_stock['history'] in ('y', 'yes', 1, True)
