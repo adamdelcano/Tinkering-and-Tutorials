@@ -213,31 +213,26 @@ class Stock:
                 f'No data for {self.ticker} found in mongodb, using yf'
             )
             full_prices = await self._get_yf()
-
             logging.info('Inserting yf data to mongodb')
             await self._mongo_insert(full_prices)
         else:
             logging.info(f'Checking for missing dates.')
             missing_dates = self.date_range.difference(mongo_prices.index)
-        # This section could all be nested under the preceding else but seemed
-        # more readable to me as a separate bit of flow control. The initial
-        # if statement here checking whether missing dates is a non-empty
-        # dataframe is admittedly a bit ugly.
-        if missing_dates is not None and not missing_dates.empty:
-            logging.info('Acquiring missing dates from yf')
-            yf_prices = await self._get_yf(
-                missing_dates[0], missing_dates[-1]
-            )
-            if yf_prices.empty is False:
-                price_dict = await self._combine_mongo_yf(
-                    mongo_prices, yf_prices
+            if not missing_dates.empty:
+                logging.info('Acquiring missing dates from yf')
+                yf_prices = await self._get_yf(
+                    missing_dates[0], missing_dates[-1]
                 )
-                logging.info('Inserting yf data to mongodb')
-                await self._mongo_insert(price_dict['missing_prices'])
-                full_prices = price_dict['full_prices']
-        else:
-            logging.info('Mongo prices were complete')
-            full_prices = mongo_prices
+                if yf_prices.empty is False:
+                    price_dict = await self._combine_mongo_yf(
+                        mongo_prices, yf_prices
+                    )
+                    logging.info('Inserting yf data to mongodb')
+                    await self._mongo_insert(price_dict['missing_prices'])
+                    full_prices = price_dict['full_prices']
+            else:
+                logging.info('Mongo prices were complete')
+                full_prices = mongo_prices
         self.prices = full_prices
 
     async def extrapolate_next_day(self) -> None:
