@@ -52,23 +52,24 @@ async def window_forecast(request: web.Request) -> web.json_response:
     logging.info(f'Views: Stock: {current_stock}')
     update = await current_stock.update_prices()
     logging.info(f'Views: Prices: {current_stock.prices}')
-    await current_stock.extrapolate_next_day()
+    if update:
+        await current_stock.extrapolate_next_day()
     logging.info(f'Views: Sending {str(current_stock.next_price)}')
+    if not update:  # if update prices didn't find anything
+        return web.Response(text='Ticker not found. May be delisted')
     # feature creep: displaying the history of stock over window days
-    if 'history' in requested_stock and (
+    elif 'history' in requested_stock and (
         requested_stock['history'] in ('y', 'yes', 1, True)
     ):
         return web.Response(
-            text=f'''{update}\n\n{current_stock.prices}\n\n
+            text=f'''{current_stock.prices}\n\n
             Prediction:\n
             {pd.io.json.dumps(current_stock.next_price, indent=1)}'''
         )
-    else:
-        return web.Response(
-            text=f'''{update}\n\n
-            Prediction:\n\n
-            {pd.io.json.dumps(current_stock.next_price, indent=1)}
-            '''
+    else:  # normal intended functionality
+        return web.json_response(
+            current_stock.next_price,
+            dumps=pd.io.json.dumps
         )
 
 
