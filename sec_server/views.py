@@ -50,11 +50,35 @@ async def window_forecast(request: web.Request) -> web.json_response:
         db
     )
     logging.info(f'Views: Stock: {current_stock}')
+    # yf only functionality to bypass mongo if needed
+    # I'm including this to see if database is bottleneck
+    if 'yf_only' in requested_stock:
+        if requested_stock['yf_only'] in ('y', 'yes', 1, True):
+            update = await current_stock.dbless_get_prices()
+            logging.info(f'yf_only: Prices: {current_stock.prices}')
+            if update:
+                await current_stock.extrapolate_next_day()
+            else:
+                return web.Response(text='Ticker not found. May be delisted')
+            logging.info(f'yf_only: Sending {str(current_stock.next_price)}')
+            if 'history' in requested_stock:
+                if requested_stock['history'] in ('y', 'yes', 1, True):
+                    return web.Response(
+                        text=f'''
+                        {current_stock.prices}\n\n
+                        Prediction:\n
+                        {pd.io.json.dumps(current_stock.next_price, indent=1)}
+                        '''
+                    )
+                else:
+                    return web.json_response(
+                        current_stock.next_price, dumps=pd.io.json.dumps
+                    )
+    # return to main control flow path
     update = await current_stock.update_prices()
-    logging.info(f'Views: Prices: {current_stock.prices}')
+    logging.info(f'Normal views: Prices: {current_stock.prices}')
     if update:
         await current_stock.extrapolate_next_day()
-    logging.info(f'Views: Sending {str(current_stock.next_price)}')
     if not update:  # if update prices didn't find anything
         return web.Response(text='Ticker not found. May be delisted')
     # feature creep: displaying the history of stock over window days
