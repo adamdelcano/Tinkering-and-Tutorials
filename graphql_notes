@@ -1,0 +1,45 @@
+GraphQL is a new API standard that was invented by Facebook.
+
+Enables declarative data fetching
+
+GraphQL server exposes a single endpoint and responds to queries.
+
+Replacement-ish for REST, which struggles with three big factors:
+1) Increased mobile usage creates need for efficient data loading.
+    graphql minimizes amount of data needed to tranfer
+2) Variety of different frontend frameworks and platforms on the client-side
+3) Fast dev speed and expectation for rapid feature development.
+    REST's exposure paradigm can slow things down.
+
+
+FB uses GraphQL since 2012 in their native mobile apps.
+First time presented publicly at React.js Conf 2015
+Can be used with any programming language and framework- predominantly limited to react in public mind but not true.
+
+Netflix and Coursera were working on similar ideas, Netflix open-sourced their solution Falcor. Coursera cancelled their own version after GraphQL was open sourced. It's used pretty widely now. There are entire conferences devoted to it. Lots of resources.
+
+Over the last decade, REST has become the (fuzzy) standard for designing web APIS.
+
+GRAPHQL VS REST
+-Great ideas in REST: stateless servers & structured access to resources.
+-REST is a strict specification, but the concept was wildly interpreted.
+-Rapidly changing requirements on client-side don't go well with the static nature of REST.
+
+GraphQL was developed to cope with the need for more flexibility and efficiency in client-server communications.
+
+EXAMPLE: BLogging app with REST
+needs separate endpoint for /users/<id>, /users/<id>/<posts>, /users/id/followers. That means three queries, and fetching user data on a name for example means fetching the whole document for their data. 
+
+You could design the API around only exposing the exact data you're using, but that means every time you update the front, you need to redo the back. Modern design is about rapid iteration- that's going to demand constant change and you don't want to live in that world.
+
+COUNTEREXAMPLE: Blogging app with GraphQL
+Single API endpoint. The one request you send is a POST (vs the GET) with a query that specifies all the data you want, and only the data you want. Server side it packages all of these stuff into one JSON object and returns that as a POST. 
+
+Other high-level differences:
+No more under/overfetching, as the example illustrates. Overfetching is getting more data than you need and wasting data, underfetching means you're not getting enough data and have to send a ton of requests.
+The ideal design pattern for REST is roughly  structure endpoints according to clients data needs but again, this fucks with rapid product iterations. GraphQL doesn't need API adjustment when product requirements/frontend design change.
+Because you know exactly what's being requested (vs the whole doc) you know what data is being read and requested by clients, and lets you do fine-grained observation which helps with performance optimization.
+GraphQL uses strong type system to define the capabilities of an API.
+GraphQL's Schema serves as a contract between client and server
+    This means frontend and backend can work completely independent from each other!
+
