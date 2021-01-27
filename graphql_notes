@@ -246,3 +246,143 @@ Two big GraphQL clients right now: Apollo Client, a community-driven effort to b
 
 ------------
 SERVER
+
+GraphQL is generally considered primarily for the benefit of the frontend, but the server-side benefits a ton too because it lets you focus on describing the data vs optimizing/implementing/futzing with endpoints.
+
+The fundamental execution algorithm for GraphQL works roughly like this:
+The query is traversed field by field, and on each field it executes a "resolver" function. So example:
+    EXAMPLE SCHEMA
+type Query {
+  author(id: ID!): Author
+}
+
+type Author {
+  posts: [Post]
+}
+
+type Post {
+  title: String
+  content: String
+}
+     EXAMPLE QUERY
+query {
+  author(id: "abc") {
+    posts {
+      title
+      content
+    }
+  }
+}
+
+So first it would check that every field in the query can get a type.
+    EXAMPLE CHECKED
+query: Query {
+  author(id: "abc"): Author {
+    posts: [Post] {
+      title: String
+      content: String
+    }
+  }
+}
+So then it just runs resolvers at every field, breadth-first, so: Query.author, which brings a result that gets fed to its child, the Author.posts resolver, which then goes down the list of children hitting up the Post.title resolver and Post.content resolver.
+
+And then in the end, the execution algorithm puts things back into the right shape and returns that.
+
+Most GraphQL server implementations will provide default resolvers, so you don't have to specify a function for every single field. If you want to look more in depth into execution, https://dev-blog.apollodata.com/graphql-explained-5844742f195e
+
+That strategy is somewhat naive, though, so you generally want to batch resolving. You can do that by wrapping the fetching function in a utility that waits for all the resolvers to run, sees what they're trying to fetch, and then makes sure to only hit each once.
+
+Then if your API supports batched requests, you can take it one step further and only do one single combined fetch, for massive value. In JavaScript, you can use DataLoader, and there's similar untilities for other languages.
+------------
+MORE GRAPHQL CONCEPTS:
+
+Enhancing Reusability with Fragments
+A fragment is a collection of fields on a specific type. So if you had like:
+type User {
+  name: String!
+  age: Int!
+  email: String!
+  street: String!
+  zipcode: String!
+  city: String!
+}
+You could make a fragment as subset of those fields for only the stuff you want, like:
+
+fragment addressDetails on User {
+  name
+  street
+  zipcode
+  city
+}
+
+And this bundles them so you can just write
+{
+  allUsers {
+    ... addressDetails
+  }
+}
+instead of spelling out all the other stuff.
+
+Parameterizing Fields with Arguments
+When you're defining a GraphQL type, each field can take 0 or more arguments. Like function arguments in typed programming languages, each argument needs a name and a type. In GraphQL (like Python) you can have default values for args.
+
+Example, when defining Query you could do:
+type Query {
+  allUsers(olderThan: Int = -1): [User!]!  # this lets you get all users older than Int, defaulting to -1
+}
+
+-Named Query Results with Aliases-
+GraphQL has the big upside of letting you do multiple queries in a single request. Buuuut since the response data is shaped after the structure of the fields being represented, if you're asking for the same thing a bunch things can get awkward. (like querying for the name field over a bunch of diff users)
+The way to get around this is to use aliases, which is specifying names for the query results.
+Example of Aliases: 
+{
+  first: User(id: "1") {
+    name
+  }
+  second: User(id: "2") {
+    name
+  }
+}
+So the server is going to have a name to assign to each of those userids, which means it's not going to think of them as the same field for different arguments.
+
+-Advanced SDL-
+
+Object & Scalar Types
+-Scalar types are concrete units of data. There are 5 predefined ones: String, Int, Float, Boolean, ID
+-Object types have fields that express the properties of that type and are composable. Ex: User or Post
+In every GraphQL schema, you can define your own scalar and object types. 'Date' is a pretty common custom example.
+
+Enums
+GraphQL lets you define enumerations (short: enums), which lets you express the semantics of a type that has a fixed limited set of values. We could thus define a type called Weekday to represent all the days of a week:
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+Note that technically enums are special kinds of scalar types.
+
+Interface
+An interface lets you describe a type in an abstract way. It lets you set fields that any concrete type
+implementing the interface needs to have. For example, most schemas require every type to have an id field.
+To be sure you don't fuck up, you can make an interface with the id field and then make sure every custom type implements it.
+
+Union Types
+Union types let you say a type should be EITHER of a collection of other types. So if you had an Adult type, and a Child type, you could define a union Person = Adult | Child. This also lets you query for conditional fragments:
+{
+  allPersons {
+    name # works for `Adult` and `Child`
+    ... on Child {
+      school
+    }
+    ... on Adult {
+       work
+    }
+  }
+}
+------------
+TOOLING AND ECOSYSTEM
