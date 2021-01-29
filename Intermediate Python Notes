@@ -985,3 +985,78 @@ would return:
 --------------------------------------------
 
 G E N E R A T O R S
+
+Generators are functions that return an object that can be iterated over, and does so lazily. They do it only one at a time and only when you ask, which is very efficient.
+
+    def mygenerator():
+        yield 1
+        yield 2
+        yield 3
+
+g = mygenerator()
+print(g) # will only show it's a generator
+
+for i in g:
+    print(i)  # will print 1,2,3
+
+g = mygenerator()
+value = next(g)
+print(value)  # prints 1, then prints 2, then prints 3, then raises a StopIteration. This is incidentally how async works in python.
+
+You can use them as inputs to functions that take iterables.
+sorted(g)  # returns a list == [1, 2, 3]
+
+
+    def countdown(num):
+        print('Starting')
+        while num > 0:
+            yield num
+            num -= 1
+
+cd = countdown(4)  # won't print start right here
+value = next(cd)  # will print 'Starting' and run until the first yield statement
+
+Generators are very memory efficient if you're working with large data. 
+
+sys.getsizeof(obj)  # gets size of object in bytes
+
+--------------------------------------------
+
+T H R E A D I N G  A N D  M U L T I P R O C E S S I NG
+
+PROCESS: A process is an instance of a program. If you have the same program running multiple times, those are all different processes.
++ Takes advantage of multiple CPUS and cores
++ Separate memory space -> memory is not shared between processes
++ Great for CPU-bound processing
++ New process is stated independently from other processes
++ Processes are interruptable/killable
++ One GIL for each process -> avoids GIL limitation
+
+- Heavyweight
+- Starting a process is slower than starting a thread.
+- More memory
+- IPC (inter-process communication) is more complicated.
+
+
+
+THREAD: A thread is an entity within a process. Also known as 'lightweight process'. A process can spawn multiple threads.
+
++ All threads within a process share the same memory
++ Lightweight
++ A thread is faster than starting a process
++ Great for I/O-bound tasks
+
+- Threading is limited by GIL: only one thread at a time
+- No effect for CPU-bound tasks
+- Not interruptable/killable
+- Have to be careful with race conditions! When two or more threads want to modify the same variable at the same time, BAD THINGS HAPPEN.
+
+GIL: Global Interpreter Lock
+- A lock that allows only one thread at a time to execute in Python
+
+-Needed in CPython becasue memory management is not thread-safe
+
+-To Avoid:
+  - Use multiprocessing
+  - Use a different, free-threaded Python implementation (Jython, IronPython)
+  - use Python as a wrapper for third-party libraries (C/C_++) -> numpy, scipy

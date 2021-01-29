@@ -386,3 +386,137 @@ Union types let you say a type should be EITHER of a collection of other types. 
 }
 ------------
 TOOLING AND ECOSYSTEM
+
+INTROSPECTION:
+So, the schema designer obviously knows what the schema looks like.
+The client, though, can discover what's accessible using the __schema metafield, which is always available on the root type of a Query per the GraphQL spec.
+query {
+  __schema {
+    types {
+      name  # will get the name of every type in the schema
+    }
+  }
+}
+Yes, you can introspect the introspection. 
+EXAMPLE:
+{
+  __type(name: "Author") {
+    name
+    description
+  }
+}
+EXAMPLE RETURN:
+{
+  "data": {
+    "__type": {
+      "name": "Author",
+      "description": "The author of a post.",
+    }
+  }
+}
+This is super cool because it lets you do things like make documentation browsers, autocomplete, code generation!
+GraphiQL which is very useful uses introspection heavily.
+
+GRAPHQL PLAYGROUND:
+The Jupyter noteboks of GraphQL, it's an IDE-ish for interactively working with a GraphQL API. Has an editor for queries/mutations/subscriptions, has autocomplete and validation as well as documentation explorer
+------------
+SECURITY
+
+Great power to clients == great danger. You need to make sure your server can handle queries malicious or just fucking huge. From simplest to most complex, those are:
+----
+Timeout
+Use a timeout to defend against hypermassive queries. Simple because you don't need to know anything about the query, you just say "it can't take more than e.g 5 seconds"
++ Simple to implement
++ Most strats will still use a timeout as final protection
+
+- Damage can already be done when the timeout kicks in.
+- Sometimes hard to implement. Also, timing out the connection after n seconds can result in weird behaviors.
+----
+Max Query Depth
+So to address the problem of
+query IAmEvil {
+  author(id: "abc") {
+    posts {
+      author {
+        posts {
+          author {
+            posts {
+              author {
+                # that could go on as deep as the client wants!
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+You can set a max query depth, and be like "If it's deeper than n, it's REJECTED"
+
++ Since the AST (abstract syntax tree) is evaluated dynamically, it doesn't execute, so there's no damage/load to the server.
+
+- Depth alone doesn't handle all abusive queries. You could query a ludicrous number of nodes in a wide/broad way and Max Query Depth won't hit it.
+
+----
+Query Complexity
+
+Since depth alone won't let you truly know how intensive/expensive a query is, you can just define the complexity of query components and set a max complexity for them. 
+
++ Covers more than just depth
++ Like max depth, evaluates before execution, so no wasted time
+
+- hard to implement perfectly
+- needs labor for definition and maintenance
+- mutations are HARD to estimate: what if they have side effects? how can you tell
+
+----
+Throttling
+So you can use the above measures to stop single big queries. What about lots of small queries? You can throttle the number of requests over time, but medium size queries are  a problem because it doesn't take a ridiculous number of them to bork the server. So how do we handle this?
+
+Option 1: Server Time
+So you can throttle based on server time, which is a pretty good estimate of how expensive a query is to complete. With a little testing and good knowledge, you can figure out what a reasonable cap is, and use the Leaky Bucker algorithm to regulate it: assign say, 1000ms of server time, with 100ms added per second, so that a client can keep going but not faster than a specific rate. If they try a 200ms query every second, after about 10 seconds they'll run out and only be able to do it every other second, etc.
+
+It's worth making this throttling visible to clients if your GraphQL API is public: that lets them make intelligent decisions. Downside: server time isn't... super easy to estimate, as a client. How can we make it more legible?
+
+Option 2: Query Complexity Throttling
+
+If you assign query complexity and throttle based on that, it's very easy for the client to understand the magnitude of what they're asking. While it has the downsides listed under query complexity, it has a great deal of flexibility and is very client-friendly, while still not allowing abusive requests.
+
+------------
+COMMON QUESTIONS?
+
+Is GraphQL a database tech?
+No, it's an adapter- a query language for APIS. It's database agnostic and technically doesn't even require a database.
+
+Is GraphQL only for React/JS devs?
+No, it's for any API context. On the backend, it can be done in any language that can be used to build a web server. Javascript, Ruby, Python, Scala, Java, Clojure, Go, and .NMET all have reference implementations. All you need to communicate with it is HTTP to make queries (and technically not even that, it's transport-layer agnostic)
+
+How do you do server-side caching?
+It's still a challenge tbh. REST is easy to cache since you cache each endpoint separately- the structure of the data won't change. GraphQL doesn't have the assuredness re: what the client will rquest next, so it makes less sense to put a caching layer right behind the API.
+
+How does GraphQL handle Authentication/Authorization?
+Authentication: who you are -> OAuth, other common patterns
+Authorization: what you can do -> best handled at the business logic layer, not at GraphQL.
+
+How to do Error Handling?
+Successful GraphQL queries return "data" as a root field in the JSON object, if they fail they also include "error.""
+
+Can you GraphQL offline?
+Well yes but actually no. GraphQL is an API and so really only makes sense for web API usage. It is transport layer agnostic though so if for some reason you wanted to do an essentially-online thing offline, have at. Relay and Apollo have some caching capabilities but there isn't a common solution for persisting stored client-side data yet, which is a valid concern. http://www.east5th.co/blog/2017/07/24/offline-graphql-queries-with-redux-offline-and-apollo/ has an interesting look at it.
+
+------------
+graphql-python
+Implementing a graphql server, which means it can:
+-Receive graphql formatted requests
+-connect to any dbs necessary for storing/fetching the data
+-return a graphql-formatted response
+-validate incoming requests agains tthe schema definition and supported format
+
+SCHEMA-DRIVEN DEVELOPMENT
+The center of the development process will be the schema. The process is something like:
+1. Define the types and the appropriate queries/mutations
+2. Implement resolver functions for all of those
+3. ITERATE REPEATING STEPS 1/2
+
+Keeping it central means both sides (front and back) can evolve without going off spec.
+
