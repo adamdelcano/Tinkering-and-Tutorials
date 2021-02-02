@@ -3057,7 +3057,7 @@ Breakfast: Kale w/ cheddar and sweet onion, milk w/ protein powder
 Lunch: Bagel w/ cream cheese and spam and nori.
 Tea: almond vanilla
 Pomodoro Goal: 12 work 12 nonwork
-Accomplished:
+Accomplished: 3 work 5 nonwork
 
 Writing this at 9:50, feeling pretty okay about today but morning routine is not yet at a great spot. I need to work on compliance, I don't know what's necessary to make that happen. I'm going to try to swing for the fences today on pomodoros and add the stuff I need to do in, but it's going to take me all day. That said, I am counting stuff like therapy and mobilesuit mondays in there too. At this point my goal peoplewise is explicitly "Nita as nesting partner in open committed relationship, Christina as live-in sub, Stephanie and Chloe as friends with benefits." I am a weirdo and I accept it and my plan is just work on that. However, it's important that I accept that this is ultimately beyond my control, and I can only work on being someone who would be worthy of consideration there. 
 
@@ -3070,3 +3070,31 @@ Fancy socks are on the way, bagels are proofing, chair and air quality monitor a
 I need to get on top of recreational stuff in a more "actually doing it" way. It's silly that I'm going to be putting it as pomodoros but I think it will genuinely help. 
 
 Did therapy, now going to do graphql.
+
+Finished first GraphQL, taking a long break, making lunch I think. Not sure what to make. Wait no, bagel spam sandwich. 
+
+Still not happy with my productivity.
+
+2/2 Tuesday 318LS 13157DA 169PW
+Rune: ᛗ
+“The joyous man is dear to his kinsmen;
+yet every man is doomed to fail his fellow,
+since the Lord by his decree
+will commit the vile carrion to the earth.”
+Thus sayeth Mannaz
+Breakfast: eggs and broccoli rabe, milk w/ protein powder
+Lunch: 
+Tea: Golden Assam
+Pomodoro Goal: 12 work 4 nonwork
+
+Writing this at 10:40, have had breakfast, feeling pretty good. We've gotten a lot of snow, but that's not a problem for me. I have plenty of stuff to eat, I don't have anywhere I need to go, I am cozy in my room. Life is very good in a lot of ways right now. I need to be a little more careful with finances, and stuff, and I need to get back on exercising, but I think I'm genuinely in a good spot. My near-term goals:
+ -call M&T
+ -finish graphql tutorial
+ -finish flask tutorial
+ -find and do django tutorial
+ -implement website on my own time for portfolio
+ -do stuff with Nita
+ -do stuff with Steph
+ -keep communication with Chloe and Christina open
+
+ I think all of these are very feasible in the next two weeks. 
