@@ -3083,9 +3083,10 @@ since the Lord by his decree
 will commit the vile carrion to the earth.”
 Thus sayeth Mannaz
 Breakfast: eggs and broccoli rabe, milk w/ protein powder
-Lunch: 
+Lunch: Fried potatoes, yogurt, milk w/ protein powder
 Tea: Golden Assam
 Pomodoro Goal: 12 work 4 nonwork
+Accopmlished: 5 work, 3 nonwork
 
 Writing this at 10:40, have had breakfast, feeling pretty good. We've gotten a lot of snow, but that's not a problem for me. I have plenty of stuff to eat, I don't have anywhere I need to go, I am cozy in my room. Life is very good in a lot of ways right now. I need to be a little more careful with finances, and stuff, and I need to get back on exercising, but I think I'm genuinely in a good spot. My near-term goals:
  -call M&T
@@ -3098,3 +3099,5 @@ Writing this at 10:40, have had breakfast, feeling pretty good. We've gotten a l
  -keep communication with Chloe and Christina open
 
  I think all of these are very feasible in the next two weeks. 
+
+ It's 11, I finished the first graphql tutorial, played pickup D&D with netjogging, forgot to stop second batch of bagels proofing so they're 6 hours on the second proof, we'll see how that goes. Going to do one more pomodoro to get started with the frontend graphql tutorial then head to bed.
