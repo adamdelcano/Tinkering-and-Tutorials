@@ -16,7 +16,7 @@ mylist will now have 11 at the end
 because both list variabless refer to the same list in the memory
 copy_mylist = mylist.copy() or list(mylist) or mylist[:] all make copies that you can modify
 -----------------------
-tuples: immutable data type, is created by parentheses with common
+tuples: immutable data type, is created by parentheses with comma
 mytuple = ("Max", 28, "Boston")
 technically parentheses optional
 mytuple = "Max", 28, "Boston" is valid
@@ -1060,3 +1060,6 @@ GIL: Global Interpreter Lock
   - Use multiprocessing
   - Use a different, free-threaded Python implementation (Jython, IronPython)
   - use Python as a wrapper for third-party libraries (C/C_++) -> numpy, scipy
+
+THREADING:
+
