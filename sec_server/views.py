@@ -60,20 +60,20 @@ async def window_forecast(request: web.Request) -> web.json_response:
             if update:
                 next_price = await current_stock.extrapolate_next_day()
             else:
-                return web.Response(text='Ticker not found. May be delisted')
+                return web.json_response(
+                    data='Ticker not found. May be delisted',
+                    dumps=pd.io.json.dumps
+                )
             logging.info(f'yf_only: Sending {next_price}')
             if 'history' in requested_stock:
                 if requested_stock['history'] in ('y', 'yes', 1, True):
-                    return web.Response(
-                        text=f'''
-                        {current_stock.prices}\n\n
-                        Prediction:\n
-                        {pd.io.json.dumps(next_price, indent=1)}
-                        '''
+                    return web.json_response(
+                        data=[current_stock.prices, next_price],
+                        dumps=pd.io.json.dumps
                     )
                 else:
                     return web.json_response(
-                        next_price, dumps=pd.io.json.dumps
+                        data=next_price, dumps=pd.io.json.dumps
                     )
     # return to main control flow path
     update = await current_stock.update_prices()
@@ -81,19 +81,21 @@ async def window_forecast(request: web.Request) -> web.json_response:
     if update:
         next_price = await current_stock.extrapolate_next_day()
     if not update:  # if update prices didn't find anything
-        return web.Response(text='Ticker not found. May be delisted')
+        return web.json_response(
+            data='Ticker not found. May be delisted',
+            dumps=pd.io.json.dumps
+        )
     # feature creep: displaying the history of stock over window days
     elif 'history' in requested_stock and (
         requested_stock['history'] in ('y', 'yes', 1, True)
     ):
-        return web.Response(
-            text=f'''{current_stock.prices}\n\n
-            Prediction:\n
-            {pd.io.json.dumps(next_price, indent=1)}'''
+        return web.json_response(
+            data=[current_stock.prices, next_price],
+            dumps=pd.io.json.dumps
         )
     else:  # normal intended functionality
         return web.json_response(
-            next_price,
+            data=next_price,
             dumps=pd.io.json.dumps
         )
 
@@ -122,4 +124,4 @@ async def forecast(request: web.Request) -> web.json_response:
             ''')
     new_data = await extrapolate(data)
     logging.info(f'Sending {new_data}')
-    return web.json_response(new_data, dumps=pd.io.json.dumps)
+    return web.json_response(data=new_data, dumps=pd.io.json.dumps)

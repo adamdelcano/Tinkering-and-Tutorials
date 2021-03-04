@@ -170,6 +170,7 @@ class Stock:
         the full_prices dataframe and handling the faceting/dropping of the
         _merge column in Stock.update_prices().
         """
+        # resetting the index is necessary for the outer union merge to work
         mongo_data.reset_index(inplace=True)
         yf_data.reset_index(inplace=True)
         try:
@@ -180,6 +181,7 @@ class Stock:
             logging.warning(f'Merge failed: dumping {mongo_data.to_string()}')
             logging.warning(f'Merge failed: dumping: {yf_data.to_string()}')
             raise
+        # re-indexing the dataframe post-merge
         full_prices.set_index('Date', inplace=True)
         missing_prices = full_prices.loc[
             lambda x: x['_merge'] == 'right_only'
