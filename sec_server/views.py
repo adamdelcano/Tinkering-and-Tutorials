@@ -29,17 +29,18 @@ async def window_forecast(request: web.Request) -> web.json_response:
     Receives a request containing a string/int of ticker and window, and
     uses the Stock class to generate a response, while logging at each step.
     """
-    logging.info(f'Received {str(request)}.')
+    logging.info(f'Received {request}.')
     db = request.app['db']
     try:
         requested_stock = await request.json()
         logging.info('Json received and decoded')
     except json.decoder.JSONDecodeError:
-        logging.warning(f'Unparseable data {str(request)}: sent back 400.')
+        body = await request.body()
+        logging.warning(f'Unparseable data, {body}: sent back 400 error.')
         raise web.HTTPBadRequest(reason='''
             Message was not POST with recognizeable json.
             ''')
-    logging.info(f'Processed: {requested_stock}')
+    logging.info(f'Beginning to process: {requested_stock}')
     # seems worth it to make it case insensitive
     requested_stock = {
         k.lower(): v for k, v in requested_stock.items()
@@ -57,28 +58,28 @@ async def window_forecast(request: web.Request) -> web.json_response:
             update = await current_stock.dbless_get_prices()
             logging.info(f'yf_only: Prices: {current_stock.prices}')
             if update:
-                await current_stock.extrapolate_next_day()
+                next_price = await current_stock.extrapolate_next_day()
             else:
                 return web.Response(text='Ticker not found. May be delisted')
-            logging.info(f'yf_only: Sending {str(current_stock.next_price)}')
+            logging.info(f'yf_only: Sending {next_price}')
             if 'history' in requested_stock:
                 if requested_stock['history'] in ('y', 'yes', 1, True):
                     return web.Response(
                         text=f'''
                         {current_stock.prices}\n\n
                         Prediction:\n
-                        {pd.io.json.dumps(current_stock.next_price, indent=1)}
+                        {pd.io.json.dumps(next_price, indent=1)}
                         '''
                     )
                 else:
                     return web.json_response(
-                        current_stock.next_price, dumps=pd.io.json.dumps
+                        next_price, dumps=pd.io.json.dumps
                     )
     # return to main control flow path
     update = await current_stock.update_prices()
     logging.info(f'Normal views: Prices: {current_stock.prices}')
     if update:
-        await current_stock.extrapolate_next_day()
+        next_price = await current_stock.extrapolate_next_day()
     if not update:  # if update prices didn't find anything
         return web.Response(text='Ticker not found. May be delisted')
     # feature creep: displaying the history of stock over window days
@@ -88,11 +89,11 @@ async def window_forecast(request: web.Request) -> web.json_response:
         return web.Response(
             text=f'''{current_stock.prices}\n\n
             Prediction:\n
-            {pd.io.json.dumps(current_stock.next_price, indent=1)}'''
+            {pd.io.json.dumps(next_price, indent=1)}'''
         )
     else:  # normal intended functionality
         return web.json_response(
-            current_stock.next_price,
+            next_price,
             dumps=pd.io.json.dumps
         )
 
@@ -109,7 +110,7 @@ async def forecast(request: web.Request) -> web.json_response:
     Takes web.Request object as sole parameter (should be POST w/ json) and
     returns a processed web.json_response object.
     """
-    logging.info(f'Received {str(request)}')
+    logging.info(f'Received {request}')
     try:
         data = await request.json()
         logging.info('Json received and decoded.')
@@ -120,5 +121,5 @@ async def forecast(request: web.Request) -> web.json_response:
             Message was not POST with recognizeable json.
             ''')
     new_data = await extrapolate(data)
-    logging.info(f'Sending {str(new_data)}')
+    logging.info(f'Sending {new_data}')
     return web.json_response(new_data, dumps=pd.io.json.dumps)

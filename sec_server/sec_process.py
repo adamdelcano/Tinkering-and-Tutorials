@@ -1,6 +1,6 @@
 import asyncio
 import concurrent.futures
-from datetime import date
+from datetime import datetime
 from functools import partial
 import logging
 
@@ -55,7 +55,7 @@ class Stock:
         self.ticker = ticker
         self.window = window
         self.db = db
-        self.today = date.today()
+        self.today = datetime.now()  # updated from date.today()
         self.starting_point = (
             self.today - pd.tseries.offsets.BDay(window + 4)
         )
@@ -64,7 +64,6 @@ class Stock:
         )
         self.next_day = None  # will contain next day
         self.prices = None  # this will contain the prices
-        self.next_price = None  # this will contain extrapolated price
 
     async def _check_mongo(self) -> pd.DataFrame:
         """
@@ -77,13 +76,9 @@ class Stock:
         Converts the DateTimeIndex to a list b/c it's hashable whereas
         DateTimeIndex isn't.
         """
-        pipeline = []
         dates = [date for date in self.date_range]
-        ticker_name = {"$match": {"ticker": self.ticker}}
-        dates = {"$match": {"date": {"$in": dates}}}
-        pipeline.extend([ticker_name, dates])
-        cursor = self.db.aggregate(pipeline)
-        documents = await cursor.to_list(None)
+        cursor = self.db.find({"ticker": self.ticker, "date": {"$in": dates}})
+        documents = [doc async for doc in cursor]
         documents_df = pd.DataFrame(documents)
         if documents_df.empty:
             return documents_df
@@ -95,8 +90,8 @@ class Stock:
 
     async def _get_yf(
         self,
-        beginning: date = None,
-        ending: date = None,
+        beginning: datetime = None,
+        ending: datetime = None,
     ) -> pd.DataFrame:
         """
         Returns the ticker's prices from yfinance.
@@ -105,8 +100,8 @@ class Stock:
         loop and calls yfinance via run_in_executor to handle the I/O-bound
         blocking nature thereof.
 
-        beginning: a datetime.date object representing the first day
-        ending: a datetime.date object representing the last day
+        beginning: a datetime.datetime object representing the first day
+        ending: a datetime.datetime object representing the last day
 
 
         """
@@ -116,7 +111,7 @@ class Stock:
             ending = self.today
         loop = asyncio.get_running_loop()
         stock_object = await loop.run_in_executor(
-            None, partial(yf.Ticker, self.ticker)
+            executor=None, func=partial(yf.Ticker, self.ticker)
         )
         return stock_object.history(
             start=beginning,
@@ -181,21 +176,22 @@ class Stock:
             full_prices = mongo_data.merge(
                 yf_data, how='outer', indicator=True
             )
-            full_prices.set_index('Date', inplace=True)
-            missing_prices = full_prices.loc[
-                lambda x: x['_merge'] == 'right_only'
-            ]
-            full_prices.drop(columns=['_merge'], inplace=True)
-            missing_prices.drop(columns=['_merge'], inplace=True)
-            return {
-                'full_prices': full_prices,
-                'missing_prices': missing_prices
-            }
         except pd.errors.MergeError:
-            logging.warning(f'Merge failed: dumping: {mongo_data.to_string()}')
+            logging.warning(f'Merge failed: dumping {mongo_data.to_string()}')
             logging.warning(f'Merge failed: dumping: {yf_data.to_string()}')
+            raise
+        full_prices.set_index('Date', inplace=True)
+        missing_prices = full_prices.loc[
+            lambda x: x['_merge'] == 'right_only'
+        ]
+        full_prices.drop(columns=['_merge'], inplace=True)
+        missing_prices.drop(columns=['_merge'], inplace=True)
+        return {
+            'full_prices': full_prices,
+            'missing_prices': missing_prices
+        }
 
-    async def update_prices(self):
+    async def update_prices(self) -> bool:
         """
         Public-facing method to update the prices using the other
         class methods. Checks mongodb, checks that for missing data,
@@ -228,7 +224,8 @@ class Stock:
                 )
                 if yf_prices.empty is False:
                     price_dict = await self._combine_mongo_yf(
-                        mongo_prices, yf_prices
+                        mongo_data=mongo_prices,
+                        yf_data=yf_prices
                     )
                     logging.info('Inserting yf data to mongodb')
                     await self._mongo_insert(price_dict['missing_prices'])
@@ -240,7 +237,7 @@ class Stock:
         logging.info('Update successful')
         return True
 
-    async def extrapolate_next_day(self) -> None:
+    async def extrapolate_next_day(self) -> pd.core.series.Series:
         """
         Using self.prices, extrapolates the next day.
 
@@ -257,7 +254,7 @@ class Stock:
             method='spline',
             order=1,
         )
-        self.next_price = self.prices.iloc[-1]
+        return self.prices.iloc[-1]
 
 
 # From here on this is for the forecast endpoint
@@ -276,6 +273,7 @@ async def process(data: dict) -> pd.DataFrame:
     return df
 
 
+# Also for the forecast endpoint
 async def extrapolate(data: dict) -> pd.DataFrame:
     """
     Extrapolates the data, adding new days with appropriate values.
@@ -294,8 +292,8 @@ async def extrapolate(data: dict) -> pd.DataFrame:
     # Convert index to datetime, generate next day, append it as blank row
     logging.info('Calculating next day')
     df.index = pd.to_datetime(df.index)
-    next_day = pd.date_range(start=df.index[-1], periods=2, freq='B')[-1]
-    logging.info('Appending')
+    next_day = df.index[-1] + pd.tseries.offsets.BDay(1)
+    logging.info('Successfully calculated. Appending next day.')
     df.loc[next_day] = None
     # Interpolate and put that data in
     df = df.interpolate(
