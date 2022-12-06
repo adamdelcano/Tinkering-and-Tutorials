@@ -1,2 +1,2 @@
 # Tinkering
-For severe tutelage
+Leetcode attempts, take home projects, tutorials, etcs
